@@ -1,0 +1,26 @@
+---
+title: "Project Part 1 - Data Description and Questions to Answer"
+author: "Ryan Grunert"
+date: "9/10/2021"
+output: word_document
+---
+
+### Data Description
+
+The data I will be using for the MADA class project is American White Ibis (*Eudocimus albus*) blood parasite data that was collected from 2010-2017. The data was collected in a collaboration between Dr. Michael Yabsley's lab (of which I am a part) and Dr. Sonia Hernandez's lab here at UGA. I received the raw data from Dr. Yabsley in an agreement to analyze the data over the course of the semester in exchange for using the data for the MADA project. The parasite the data focuses on is the protozoan *Haemoproteus*, which causes a chronic infection in not only White Ibises, but many other birds as well. *Haemoproteus* is a vector-borne disease, it is transmitted by *Culicoides* biting midges when they feed on the birds and causes long-lasting parasitemia.
+
+The data is split into two sections; 2010-2014 and 2015-2017. For 2010-2014, there are 269 observations (each of which represents a sample taken from different individual birds) and 20 variables. For 2015-2017, there are 401 observations and 29 variables. 
+
+The two sections differ in the number of variables recorded for each observation. 
+
+
+
+
+
+
+
+
+
+
+
+
