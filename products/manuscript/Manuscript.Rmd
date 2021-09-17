@@ -1,7 +1,7 @@
 ---
-title: "Example Manuscript Template for a Data Analysis Project"
+title: "MADA Project - Ibis Blood Parasites from Florida"
 subtitle: ""
-author: Andreas Handel
+author: Ryan Grunert
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: article
@@ -14,94 +14,117 @@ output:
 bibliography: ../references.bib
 csl: ../apa.csl
 ---
-
-The structure below is a possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed.
-
-
-# Summary/Abstract
-_Write a summary of your project._
+```{r}
+#Loading required packages
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse) #all required data manipulation packages
+library(xlsx) #to read in excel spreadsheets
+```
 
 
 # Introduction 
 
 ## General Background Information
-_Provide enough background on your topic that others can understand the why and how of your analysis_ 
+The data I will be using for this project is American White Ibis (*Eudocimus albus*) blood parasite data that was collected from 2010-2017. The parasite the data focuses on is the protozoan *Haemoproteus*, which causes a chronic blood infection in White Ibises and many other birds. *Haemoproteus* is a vector-borne disease, it is transmitted by *Culicoides* biting midges when they feed on the birds and causes long-lasting parasitemia. Adult healthy birds tolerate haemosporidian infections well, but young birds and birds outside their normal range that are naive to the pathogen are more likely to develop clinical disease. Haemosporidian infections usually cause long-lasting chronic infections in natural hosts, and can cause reduced reproductive success, host fitness, and increased stress and disease susceptibility.
+
+Here is a link to a previously published study concerning this data -> https://www.sciencedirect.com/science/article/pii/S221322441730072X
+
 
 ## Description of data and data source
-_Describe what the data is, what it contains, where it is from, etc. Eventually this might be part of a methods section._
+The data was collected in a collaboration between Dr. Michael Yabsley's lab (of which I am a part) and Dr. Sonia Hernandez's lab here at UGA. I received the raw data from Dr. Yabsley in an agreement to analyze the data over the course of the semester in exchange for using the data for the MADA project.
+
+The data is organized in excel spreadsheets. The two main spreadsheets (Ibis_Blood_ParasiteData_2017 and IbisFieldDataOct19_2017) hold the majority of the data, and two supplemental spreadsheets from other collaborators that were or currently working on the project contain additional variables that will be combined with the main dataset in R for additional analyses. Each observation in the data is an individual White Ibis that was captured and sampled, and each variable is a different descriptor of either the Ibis itself, or the site/environment it was captured in.
+
+Two datasheets have overlapping information (Ibis_Blood_ParasiteData_2017 and IbisFieldDataOct19_2017), but both will be combined to have a complete dataset for analysis. The first contains parasitemia data, while the second contains field data. The 100IbisID_UrbanGradient datasheet will be used to assist with the analysis concerning *Haemoproteus* presence and habitat type. The SalmonellaFieldSerotypes datasheet may be used to compare the presence of both *Haemoproteus* and *Salmonella* in the Ibis, although that may not be needed considering the difference in biology and epidemiology of the two pathogens.
+
+```{r}
+#Setting the path to the Ibis blood parasite spreadsheet
+data_locationIbisB <- here::here("data","raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
+
+#Loads the raw Ibis blood data excel sheet from 2015-2017
+rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
+
+#Loads the raw Ibis blood data excel sheet from 2010-2014
+rdIbisBlood10_14 <- read.xlsx(data_locationIbisB, sheetName = "2010-2014")
+
+glimpse(rdIbisBlood15_17)
+glimpse(rdIbisBlood10_14)
+
+```
+
+The main variables I'm interested in for these two sheets above are "Haemoproteus.parasitemia.", and the first "X" column is the sample/bird ID. The 2010-14 set is missing more data, but characteristics of the birds from that group may be used.
+
+```{r}
+#Setting the path to the Ibis field data spreadsheet
+data_locationIbisF <- here::here("data","raw_data","IbisFieldDataOct19_2017.xlsx")
+
+#Loads the raw Ibis field data excel sheet
+rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
+
+glimpse(rdIbisField)
+
+```
+
+This dataset is the most organized sheet, but columns of interest will be extracted from this sheet as well as the others to create new clean data frames for analysis.
+
+```{r}
+#Setting the path to the first Ibis supplemental excel sheet (Urban Gradients)
+data_locationIbisUr <- here::here("data","raw_data","100IbisID_UrbanGradient.xlsx")
+
+#Loads the raw Ibis Urban Gradient supplemental data sheet
+UrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
+
+glimpse(UrbanIbis)
+
+```
+
+These samples from this datasheet will be used in conjunction with the two main datasheets in order to create an "urbanization gradient" for the samples that are located in either rural or urban areas. The gradient will most likely range from least ("1", rural) to most ("4", urban) urban for example, but further work and planning needs to be done first in order to figure out the specifics of the analysis.
+
+```{r}
+#Setting the path to the second Ibis supplemental excel sheet (Salmonella)
+data_locationIbisSal <- here::here("data","raw_data","SalmonellaFieldSerotypesAug27_2018.xlsx")
+
+#Loads the raw Ibis Urban Gradient supplemental data sheet
+SalIbis <- read.xlsx(data_locationIbisSal, sheetName = "ALL Positives")
+
+glimpse(SalIbis)
+```
+
+This sheet details the Ibises that tested positive for Salmonella, but this data may not be used because of the differences in pathogenesis and epidemiology of the two diseases.
 
 ## Questions/Hypotheses to be addressed
-_State the research questions you plan to answer with this analysis._
+The questions I plan to address are whether the amounts of *Haemoproteus* parasitemia in the various Ibises are significantly different when focusing on age, sex, season, location, or habitat type (Urban and Rural). Does the amount of parasitemia in the birds decrease, increase or remain the same over time as they get older? Is parasitemia significantly higher in birds sampled in urban or rural environments? These are the main variables I will be looking at for this project, but I may analyze others as the project continues. Not all of the variables were collected for every Ibis sampled, and the data still needs cleaning to accurately detail the sample size for each analysis.
 
-
+## Expected Analyses
+I think that I will have to conduct multiple ANOVA's during the analysis process. Linear regression models may apply here too for some variables, but I'm not entirely sure. I would like to explore the possibility of using the location data for each sample to conduct a geographical analysis with a map as the output. I will be continuing to contact those involved with the study as well to see what analyses they want to be conducted and what questions they want answered.
 
 # Methods and Results
 
-_In most research papers, results and methods are separate. You can combine them here if you find it easier. You are also welcome to structure things such that those are separate sections._
-
-
 ## Data aquisition
-_As applicable, explain where and how you got the data. If you directly import the data from an online source, you can combine this section with the next._
 
 ## Data import and cleaning
-_Write code that reads in the file and cleans it so it's ready for analysis. Since this will be fairly long code for most datasets, it might be a good idea to have it in one or several R scripts. If that is the case, explain here briefly what kind of cleaning/processing you do, and provide more details and well documented code somewhere (e.g. as supplement in a paper). All materials, including files that contain code, should be commented well so everyone can follow along._
-
 
 ## Exploratory analysis
 
-_Use a combination of text/tables/figures to explore and describe your data. You should produce plots or tables or other summary quantities for the most interesting/important quantities in your data. Depending on the total number of variables in your dataset, explore all or some of the others. FIgures produced here might be histograms or density plots, correlation plots, etc. Tables might summarize your data._
-
-_Continue by creating plots or tables of the outcome(s) of interest and the predictor/exposure/input variables you are most interested in. If your dataset is small, you can do that for all variables. Plots produced here can be scatterplots, boxplots, violinplots, etc. Tables can be simple 2x2 tables or larger ones._
-
-_To get some further insight into your data, if reasonable you could compute simple statistics (e.g. t-tests, simple regression model with 1 predictor, etc.) to look for associations between your outcome(s) and each individual predictor variable. Though note that unless you pre-specified the outcome and main exposure, any "p<0.05 means statistical significance" interpretation is not valid._
-
-Table \@ref(tab:summarytable) shows a table summarizing the data.
-
-
-```{r summarytable,  echo=FALSE}
-resulttable=readRDS("../../results/summarytable.rds")
-knitr::kable(resulttable, caption = 'Data summary table.')
-```
-
-
-Figure \@ref(fig:resultfigure) shows a scatterplot figure produced by one of the R scripts.
-
-```{r resultfigure,  fig.cap='Analysis figure.', echo=FALSE}
-knitr::include_graphics("../../results/resultfigure.png")
-```
-
-
 ## Full analysis
-
-_Use one or several suitable statistical/machine learning methods to analyze your data and to produce meaningful figures, tables, etc. This might again be code that is best placed in one or several separate R scripts that need to be well documented. You want the code to produce figures and data ready for display as tables, and save those. Then you load them here._
-
-Example table \@ref(tab:resulttable) shows a table summarizing a linear model fit.
-
-```{r resulttable,  echo=FALSE}
-resulttable=readRDS("../../results/resulttable.rds")
-knitr::kable(resulttable, caption = 'Linear model fit table.')
-```
-
 
 # Discussion
 
 ## Summary and Interpretation
-_Summarize what you did, what you found and what it means._
+
 
 ## Strengths and Limitations
-_Discuss what you perceive as strengths and limitations of your analysis._
+
 
 ## Conclusions
-_What are the main take-home messages?_
-
-_Include citations in your Rmd file using bibtex, the list of references will automatically be placed at the end_
-
-This paper [@Leek2015a] discusses types of analyses. 
-
-Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like, I just used the generic word `references.bib` but giving it a more descriptive name is probably better.
 
 
 # References
+
+
+# Summary/Abstract
+_Write a summary of your project._
 
 
 
