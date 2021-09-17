@@ -1,6 +1,8 @@
 # Overview
 
-This is Ryan Grunert's class project repository
+Part 1 of the project is located in the Manuscript.rmd file.
+
+This is Ryan Grunert's class project repository. 
 
 # Pre-requisites
 
