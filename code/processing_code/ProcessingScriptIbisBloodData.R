@@ -22,18 +22,6 @@ data_locationIbisB <- here::here("data","raw_data","Ibis_Blood_ParasiteData_2017
 rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
 #Loads the raw Ibis blood data excel sheet from 2010-2014
 rdIbisBlood10_14 <- read.xlsx(data_locationIbisB, sheetName = "2010-2014")
-#Setting the path to the Ibis field data spreadsheet
-data_locationIbisF <- here::here("data","raw_data","IbisFieldDataOct19_2017.xlsx")
-#Loads the raw Ibis field data excel sheet
-rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
-#Setting the path to the first Ibis supplemental excel sheet (Urban Gradients)
-#data_locationIbisUr <- here::here("data","raw_data","100IbisID_UrbanGradient.xlsx")
-#Loads the raw Ibis Urban Gradient supplemental data sheet
-#UrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
-#Setting the path to the second Ibis supplemental excel sheet (Salmonella)
-#data_locationIbisSal <- here::here("data","raw_data","SalmonellaFieldSerotypesAug27_2018.xlsx")
-#Loads the raw Ibis Urban Gradient supplemental data sheet
-#SalIbis <- read.xlsx(data_locationIbisSal, sheetName = "ALL Positives")
 
 #--------------------------------------------------------------------------------------#
 
@@ -124,7 +112,7 @@ IbisBlood15_17$Site[IbisBlood15_17$Site == "Dubois park"] <- "DUP"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "Dreher Park"] <- "DRP"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "Lion Country Safari"] <- "LCS"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "Dubois Park"] <- "DUP"
-IbisBlood15_17$Site[IbisBlood15_17$Site == "Loxahatchee Wildlife Refuge"] <- "LWR"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "Gaines Park"] <- "GP"
 IbisBlood15_17$Site[IbisBlood15_17$Site == "Solid Waste Authority"] <- "SWA"
