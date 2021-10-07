@@ -93,7 +93,7 @@ IbisBlood15_17 <- select(IbisBlood15_17,ID,Site.Name,Date,PCR.sex,Age,Season,Hab
                          Total.RBC,X..Haemoproteus,Haemoproteus.parasitemia.,F1,F2,F3,
                          Avg.RBC.FOV,Ibis..,Total.mass..g.,Mass.bag..g.,Mass.bird..g.,Body.condition.score..1.5.,
                          Ectoparasite.score..1.5.,Culmen.length..mm.,Wing.chord.length..mm.,
-                         Tarsus.length..mm.,Tarsus.width..mm.,Volume.serology.bleed.B.and.C..ul..after.bka.and.cort.)
+                         Tarsus.length..mm.,Tarsus.width..mm.)
                          
 ####Renaming the columns 
 IbisBlood15_17 <- rename(IbisBlood15_17,Site = Site.Name,Sex = PCR.sex,HabType = Habitat.type,TotalRBC = Total.RBC,NumHae = X..Haemoproteus,
@@ -102,7 +102,7 @@ IbisBlood15_17 <- rename(IbisBlood15_17,Site = Site.Name,Sex = PCR.sex,HabType =
                          BirdMassG = Mass.bird..g.,BodyCondScore = Body.condition.score..1.5.,
                          EctoParasitScore = Ectoparasite.score..1.5.,CulmenLmm = Culmen.length..mm.,
                          WingChordLmm = Wing.chord.length..mm.,TarsusLmm = Tarsus.length..mm.,
-                         TarsusWmm = Tarsus.width..mm.,SeroVolBleed = Volume.serology.bleed.B.and.C..ul..after.bka.and.cort.)
+                         TarsusWmm = Tarsus.width..mm.)
 
 ####Site column
 #Ibis that have sites matched with the 10_14 dataset will have the same labels
@@ -144,6 +144,7 @@ IbisBlood15_17$Sex[IbisBlood15_17$Sex == "not bled"] <- NA
 #Two values have missing data because the birds were not bled to determine sex
 IbisBlood15_17$Sex[IbisBlood15_17$Sex == "M?"] <- NA
 IbisBlood15_17$Sex[IbisBlood15_17$Sex == "F?"] <- NA
+IbisBlood15_17$Sex[IbisBlood15_17$Sex == "F "] <- "F"
 #Two values have question marks for unsure sex determination, removing those values
 
 ####Age column
@@ -176,9 +177,11 @@ IbisBlood15_17$TotalRBC <- as.numeric(IbisBlood15_17$TotalRBC)
 ####HaeParasit
 IbisBlood15_17$HaeParasit <- as.numeric(IbisBlood15_17$HaeParasit)
 
-#The rest of the columns look fine, the SeroVolBleed has text etc. written in
-#some values, just going to leave it as is right now until a decision is made
-#regarding the column.
+####-999 values
+IbisBlood15_17[IbisBlood15_17 == -999] <- NA
+
+####Removing the last couple empty rows
+IbisBlood15_17 <- IbisBlood15_17[-c(401, 402, 403, 404, 405, 406),]
 
 #This completes the cleaning phase for IbisBlood15_17
 #------------------------------------------------------------------------------------#

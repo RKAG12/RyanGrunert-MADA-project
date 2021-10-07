@@ -15,11 +15,12 @@ bibliography: ../references.bib
 csl: ../apa.csl
 ---
 ```{r}
-#Loading required packages
-library(dplyr) #for data processing
+#Loading required packages #for data processing
 library(here) #to set paths
 library(tidyverse) #all required data manipulation packages
 library(xlsx) #to read in excel spreadsheets
+library(janitor) #To assist in cleaning up dates and tidy data
+library(lubridate) #To extract times from raw data
 ```
 
 
@@ -48,8 +49,8 @@ rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
 #Loads the raw Ibis blood data excel sheet from 2010-2014
 rdIbisBlood10_14 <- read.xlsx(data_locationIbisB, sheetName = "2010-2014")
 
-glimpse(rdIbisBlood15_17)
-glimpse(rdIbisBlood10_14)
+str(rdIbisBlood15_17)
+str(rdIbisBlood10_14)
 
 ```
 
@@ -62,8 +63,7 @@ data_locationIbisF <- here::here("data","raw_data","IbisFieldDataOct19_2017.xlsx
 #Loads the raw Ibis field data excel sheet
 rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
 
-glimpse(rdIbisField)
-
+str(rdIbisField)
 ```
 
 This dataset is the most organized sheet, but columns of interest will be extracted from this sheet as well as the others to create new clean data frames for analysis.
@@ -73,9 +73,9 @@ This dataset is the most organized sheet, but columns of interest will be extrac
 data_locationIbisUr <- here::here("data","raw_data","100IbisID_UrbanGradient.xlsx")
 
 #Loads the raw Ibis Urban Gradient supplemental data sheet
-UrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
+rdUrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
 
-glimpse(UrbanIbis)
+str(rdUrbanIbis)
 
 ```
 
@@ -88,7 +88,7 @@ data_locationIbisSal <- here::here("data","raw_data","SalmonellaFieldSerotypesAu
 #Loads the raw Ibis Urban Gradient supplemental data sheet
 SalIbis <- read.xlsx(data_locationIbisSal, sheetName = "ALL Positives")
 
-glimpse(SalIbis)
+str(SalIbis)
 ```
 
 This sheet details the Ibises that tested positive for Salmonella, but this data may not be used because of the differences in pathogenesis and epidemiology of the two diseases.
@@ -96,35 +96,606 @@ This sheet details the Ibises that tested positive for Salmonella, but this data
 ## Questions/Hypotheses to be addressed
 The questions I plan to address are whether the amounts of *Haemoproteus* parasitemia in the various Ibises are significantly different when focusing on age, sex, season, location, or habitat type (Urban and Rural). Does the amount of parasitemia in the birds decrease, increase or remain the same over time as they get older? Is parasitemia significantly higher in birds sampled in urban or rural environments? These are the main variables I will be looking at for this project, but I may analyze others as the project continues. Not all of the variables were collected for every Ibis sampled, and the data still needs cleaning to accurately detail the sample size for each analysis.
 
+Is there a difference in HaeParasit between Ibis of different ages?
+- Dependent variable (outcome): HaeParasit
+- Independent variable (predictor): Age
+
+ Is there a difference in HaeParasit between Ibis of different sex?
+- Dependent variable (outcome): HaeParasit
+- Independent variable (predictor): Sex
+
+Is there a different in HaeParasit in Ibis sampled at different sites?
+ - Dependent variable (outcome): HaeParasit
+ - Independent variable (predictor): Site
+
+ Is there a difference in HaeParasit between Ibis sampled in different habitat types?
+ - Dependent variable (outcome): HaeParasit
+ - Independent variable (predictor): HabType
+
+ Is there a difference in HaeParasit between Ibis sampled at different times?
+ - Dependent variable (outcome): HaeParasit
+ - Independent variables (predictors): Date, Season
+
+
 ## Expected Analyses
-I think that I will have to conduct multiple ANOVA's during the analysis process. Linear regression models may apply here too for some variables, but I'm not entirely sure. I would like to explore the possibility of using the location data for each sample to conduct a geographical analysis with a map as the output. I will be continuing to contact those involved with the study as well to see what analyses they want to be conducted and what questions they want answered.
+I think that I will have to conduct multiple ANOVA's during the analysis process. Linear and logistic regression models apply here too for some variables.I would like to explore the possibility of using the location data for each sample to conduct a geographical analysis with a map as the output. I will be continuing to contact those involved with the study as well to see what analyses they want to be conducted and what questions they want answered.
 
-# Methods and Results
+## Data Cleaning
+The data has already been imported, so now we move onto the cleaning stage. The following code will clean, process, and save the raw Ibis blood datasets from 2010-2014 and 2015-2017. This section is contained in the "ProcessingScriptIbisBloodData.R" file.
+```{r}
+##############################Cleaning the rdIbisBlood10_14 data###########################
+IbisBlood10_14 <- rename(rdIbisBlood10_14, ID = X.) #renames the ID column
 
-## Data aquisition
+#Extracts just the columns of interest
+IbisBlood10_14 <- select(IbisBlood10_14, ID, Site.ID, Date, PCR.sex, Age..adult.juvenile., 
+                         Total.RBC, Haemoproteus.parasitemia.)
 
-## Data import and cleaning
+#Renames the columns of interest
+IbisBlood10_14 <- rename(IbisBlood10_14, Site = Site.ID, Sex = PCR.sex, Age = Age..adult.juvenile.,
+                         TotalRBC = Total.RBC, HaeParasit = Haemoproteus.parasitemia.)
+
+#Change "adult" and "juvenile" in the Age column to "A" and "J"
+IbisBlood10_14$Age[IbisBlood10_14$Age == "adult"] <- "A"
+IbisBlood10_14$Age[IbisBlood10_14$Age == "Adult"] <- "A"
+IbisBlood10_14$Age[IbisBlood10_14$Age == "juvenile"] <- "J"
+IbisBlood10_14$Age[IbisBlood10_14$Age == "SA"] <- "A"
+#Now the Ibises that had age recorded are referred to as "A" for adult or "J" for juvenile
+
+
+#Changing the DIV/0 values in HaeParasit to NA and change the column to numerical values
+IbisBlood10_14$HaeParasit <- as.numeric(IbisBlood10_14$HaeParasit)  # Divide-by-zero errors are now NA
+
+#Reformatting the date values in the Date column
+IbisBlood10_14$Date <- excel_numeric_to_date(IbisBlood10_14$Date)
+#After this step, the values that just state the year are labelled with "1905", may need to go back or exclude from analysis
+
+#Abbreviating the site names to make analysis easier
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Royal Palms"] <- "RP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Everglades"] <- "E"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Dreher Park"] <- "DRP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Indian Creek"] <- "ICP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Indian Creek "] <- "ICP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Indian Creek Park"] <- "ICP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Juno Beach"] <- "JB"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Lion Country Safari"] <- "LCS"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Lake Worth"] <- "LW"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Prosperity Oaks"] <- "PO"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Promenade Plaza"] <- "PP"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "San Mateo"] <- "SM"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "Solid Waste Authority"] <- "SWA"
+IbisBlood10_14$Site[IbisBlood10_14$Site == "West Palm Beach Zoo"] <- "WPBZ"
+
+
+#Reformatting the mislabeled dates. These are set to Jan 1st of the year they were
+#recorded on the data sheet, these entries only had the year stated, not month and day.
+IbisBlood10_14$Date[IbisBlood10_14$Date == "1905-07-02"] <- "2010-01-01"
+IbisBlood10_14$Date[IbisBlood10_14$Date == "1905-07-03"] <- "2011-01-01"
+IbisBlood10_14$Date[IbisBlood10_14$Date == "1905-07-04"] <- "2012-01-01"
+
+#The bottom of the dataset has a couple rows of just missing data for all variables,
+#This code filters the dataset so that if any rows are present that has at least
+#one variable be NOT NA, R keeps it
+IbisBlood10_14 <- filter(IbisBlood10_14, if_any(everything(), ~ !is.na(.)))
+
+#This completes the cleaning phase for IbisBlood10_14
+#------------------------------------------------------------------------------------#
+
+
+############################Cleaning the rdIbisBlood15_17 Data#########################
+
+IbisBlood15_17<- rename(rdIbisBlood15_17, ID= X.) #renames the ID column
+
+####Extracting only the columns relevant for analysis
+IbisBlood15_17 <- select(IbisBlood15_17,ID,Site.Name,Date,PCR.sex,Age,Season,Habitat.type,
+                         Total.RBC,X..Haemoproteus,Haemoproteus.parasitemia.,F1,F2,F3,
+                         Avg.RBC.FOV,Ibis..,Total.mass..g.,Mass.bag..g.,Mass.bird..g.,Body.condition.score..1.5.,
+                         Ectoparasite.score..1.5.,Culmen.length..mm.,Wing.chord.length..mm.,
+                         Tarsus.length..mm.,Tarsus.width..mm.)
+                         
+####Renaming the columns 
+IbisBlood15_17 <- rename(IbisBlood15_17,Site = Site.Name,Sex = PCR.sex,HabType = Habitat.type,TotalRBC = Total.RBC,NumHae = X..Haemoproteus,
+                         HaeParasit = Haemoproteus.parasitemia.,AvgRBC = Avg.RBC.FOV,
+                         IbisNum = Ibis..,TotalMassG = Total.mass..g.,BagMassG = Mass.bag..g.,
+                         BirdMassG = Mass.bird..g.,BodyCondScore = Body.condition.score..1.5.,
+                         EctoParasitScore = Ectoparasite.score..1.5.,CulmenLmm = Culmen.length..mm.,
+                         WingChordLmm = Wing.chord.length..mm.,TarsusLmm = Tarsus.length..mm.,
+                         TarsusWmm = Tarsus.width..mm.)
+
+####Site column
+#Ibis that have sites matched with the 10_14 dataset will have the same labels
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Juno Beach"] <- "JB"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Indian Creek Park"] <- "ICP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Dubois park"] <- "DUP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Dreher Park"] <- "DRP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Lion Country Safari"] <- "LCS"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Dubois Park"] <- "DUP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Gaines Park"] <- "GP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Solid Waste Authority"] <- "SWA"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Fisheating creek"] <- "FC"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Kitching Creek"] <- "KC"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Loxahatchee NE"] <- "LOXNE"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "DuBois Park"] <- "DUP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "TetraTech"] <- "TT"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Green Cay"] <- "GC"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Dreher park"] <- "DRP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "CROW Wildlife Rehabilitation Center"] <- "CROW"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Lake Worth"] <- "LW"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Royal Palm"] <- "RP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "JW Corbett"] <- "JWC"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Busch Wildlife Sanctuary"] <- "BWS"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Loxahatchee Slough"] <- "LOXS"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Indian Creek"] <- "ICP"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Cat House (Bonnie's, Richard Lane)"] <- "CAT"
+IbisBlood15_17$Site[IbisBlood15_17$Site == "Palm Beach Zoo"] <- "WPBZ"
+
+####Date column
+#Changing the date column to numeric values to allow date extraction
+IbisBlood15_17$Date <- as.numeric(IbisBlood15_17$Date) 
+##Reformatting the date values in the Date column
+IbisBlood15_17$Date <- excel_numeric_to_date(IbisBlood15_17$Date)
+
+####Sex column
+IbisBlood15_17$Sex[IbisBlood15_17$Sex == "not bled"] <- NA
+#Two values have missing data because the birds were not bled to determine sex
+IbisBlood15_17$Sex[IbisBlood15_17$Sex == "M?"] <- NA
+IbisBlood15_17$Sex[IbisBlood15_17$Sex == "F?"] <- NA
+IbisBlood15_17$Sex[IbisBlood15_17$Sex == "F "] <- "F"
+#Two values have question marks for unsure sex determination, removing those values
+
+####Age column
+#When an ibis reaches 4 years old, their plumage becomes all white. Any Ibis
+#that was sampled with brown plumage is considered a juvenile. Since Haemoproteus is
+#a chronic disease that mostly likely accumulates over time, long-lived birds should
+#theoretically have more parasitemia. Could not be true though and may come back to
+#look at the individual years in the juvenile birds
+IbisBlood15_17$Age[IbisBlood15_17$Age == "Juvenile"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "Adult"] <- "A"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "2nd/3rd year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "3rd year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "1st year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "adult"] <- "A"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "2nd year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "NA"] <- NA
+IbisBlood15_17$Age[IbisBlood15_17$Age == "2nd Year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "Late third year"] <- "J"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "ADULT"] <- "A"
+IbisBlood15_17$Age[IbisBlood15_17$Age == "Adult bc"] <- "A" #Not sure what bc stands for
+
+#Season and HabType are fine the way they are
+
+####TotalRBC
+IbisBlood15_17$TotalRBC <- as.numeric(IbisBlood15_17$TotalRBC)
+#DIV/0 errors are now NA in this column
+
+#NumHae column is fine
+
+####HaeParasit
+IbisBlood15_17$HaeParasit <- as.numeric(IbisBlood15_17$HaeParasit)
+
+####-999 values
+IbisBlood15_17[IbisBlood15_17 == -999] <- NA
+
+####Removing the last couple empty rows
+IbisBlood15_17 <- IbisBlood15_17[-c(401, 402, 403, 404, 405, 406),]
+
+#This completes the cleaning phase for IbisBlood15_17
+#------------------------------------------------------------------------------------#
+
+###############################Saving the Cleaned Datasets###########################
+
+#Saving the Ibis Blood 10-14 dataset as an RDS in the processed data folder
+save_data_location <- here::here("data", "processed_data", "processedIbisBlood10_14.rds")
+saveRDS(IbisBlood10_14, file = save_data_location)
+
+#Saving the Ibis Blood 15-17 dataset as an RDS in the processed data folder
+save_data_location2 <- here::here("data", "processed_data", "processedIbisBlood15_17.rds")
+saveRDS(IbisBlood15_17, file = save_data_location2)
+
+```
+
+This next section will clean, process, and save the raw Ibis Field dataset. This section is contained in the "ProcessingScriptIbisFieldData.R" file.
+
+```{r}
+######################### #Cleaning the rdIbisField Data###############################
+
+IbisField <- rename(rdIbisField, ID = ID..NSFSITE...) #renames the ID column
+
+#Selecting the columns of interest to this analysis from the datasheet
+IbisField <- select(IbisField,ID,Site.Name,Latitude,Longitude,Date,PCR.Sex,Age,Season,
+                    Habitat.type,Ibis.number,Mass.bird..g.,Body.condition.score..1.5.,
+                    Ectoparasite.score..1.5.,Culmen.length..mm.,Wing.chord.length..mm.,
+                    Tarsus.length..mm.,Tarsus.width..mm.,Habituation.score.of.flock..1.5.)
+
+#Renaming the columns of interest, also matching the other cleaned datasets
+IbisField <- rename(IbisField,Site = Site.Name,Lat = Latitude,Long = Longitude,Sex = PCR.Sex,
+                    HabType = Habitat.type,IbisNum = Ibis.number,BirdMassG = Mass.bird..g.,
+                    BodyCondScore = Body.condition.score..1.5.,EctoParasitScore = Ectoparasite.score..1.5.,
+                    CulmenLmm = Culmen.length..mm.,WingChordLmm = Wing.chord.length..mm.,
+                    TarsusLmm = Tarsus.length..mm.,TarsusWmm = Tarsus.width..mm.,HabFlockScore = Habituation.score.of.flock..1.5.)
+
+#This dataset has "-999" values which mean they are intentionally left blank,
+#Birds with an ID number of "-999" represent sites that didn't catch any birds,
+#but had weather data collected. This code deletes those observations.
+IbisField <- IbisField[!(IbisField$ID == "-999"),]
+
+####Site
+#These site location abbreviations are the same across datasets
+IbisField$Site[IbisField$Site == "Busch Wildlife Sanctuary"] <- "BWS"
+IbisField$Site[IbisField$Site == "Cat House (Bonnie's, Richard Lane)"] <- "CAT"
+IbisField$Site[IbisField$Site == "Dubois Park"] <- "DUP"
+IbisField$Site[IbisField$Site == "DuBois Park"] <- "DUP"
+IbisField$Site[IbisField$Site == "Dreher Park"] <- "DRP"
+IbisField$Site[IbisField$Site == "Fisheating Creek"] <- "FC"
+IbisField$Site[IbisField$Site == "Green Cay"] <- "GC"
+IbisField$Site[IbisField$Site == "Gaines Park"] <- "GP"
+IbisField$Site[IbisField$Site == "Indian Creek"] <- "ICP"
+IbisField$Site[IbisField$Site == "Juno Beach"] <- "JB"
+IbisField$Site[IbisField$Site == "Juno Beach "] <- "JB"
+IbisField$Site[IbisField$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
+IbisField$Site[IbisField$Site == "Kitching Creek"] <- "KC"
+IbisField$Site[IbisField$Site == "Lion Country Safari"] <- "LCS"
+IbisField$Site[IbisField$Site == "Lake Worth"] <- "LW"
+IbisField$Site[IbisField$Site == "Loxahatchee Slough"] <- "LOXS"
+IbisField$Site[IbisField$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
+IbisField$Site[IbisField$Site == "Loxahatchee/LILA Cell B2"] <- "LOXB2"
+IbisField$Site[IbisField$Site == "Loxahatchee NE "] <- "LOXNE"
+IbisField$Site[IbisField$Site == "Palm Beach Zoo"] <- "WPBZ"
+IbisField$Site[IbisField$Site == "Royal Palm"] <- "RP"
+IbisField$Site[IbisField$Site == "CROW Wildlife Rehabilitation Center"] <- "CROW"
+IbisField$Site[IbisField$Site == "Solid Waste Authority"] <- "SWA"
+IbisField$Site[IbisField$Site == "TetraTech"] <- "TT"
+
+####Sex Column
+#This replaces the -999 and FAIL values with NA. The IbisBlood datasheets carry more sex data for the birds
+IbisField$Sex[IbisField$Sex == "FAIL"] <- NA
+
+####Age Column
+IbisField$Age[IbisField$Age == "Adult"] <- "A"
+IbisField$Age[IbisField$Age == "3rd year"] <- "J"
+IbisField$Age[IbisField$Age == "2nd year"] <- "J"
+IbisField$Age[IbisField$Age == "1st year"] <- "J"
+IbisField$Age[IbisField$Age == "NA"] <- NA
+IbisField$Age[IbisField$Age == "Adult "] <- "A"
+IbisField$Age[IbisField$Age == "2nd year "] <- "J"
+IbisField$Age[IbisField$Age == "Juvenile"] <- "J"
+IbisField$Age[IbisField$Age == "2nd Year"] <- "J"
+
+#Replacing all -999 values in the dataset with NA
+IbisField[IbisField == -999] <- NA
+
+#Replacing NA text strings with regular NA values in multiple columns
+IbisField$BodyCondScore[IbisField$BodyCondScore == "NA"] <- NA
+IbisField$HabFlockScore[IbisField$HabFlockScore == "NA"] <- NA
+IbisField$CulmenLmm[IbisField$CulmenLmm == "NA"] <- NA
+IbisField$WingChordLmm[IbisField$WingChordLmm == "NA"] <- NA
+IbisField$TarsusLmm[IbisField$TarsusLmm == "NA"] <- NA
+IbisField$TarsusWmm[IbisField$TarsusWmm == "NA"] <- NA
+
+#--------------------------------------------------------------------------------------#
+
+###############################Saving the Cleaned Dataset###############################
+
+save_data_location3 <- here::here("data", "processed_data", "processedIbisFielddata.rds")
+saveRDS(IbisField, file = save_data_location3)
+```
+
+This cleaning code section will clean, process, and save the Ibis urbanization dataset. This section is contained in the "ProcessingScriptIbisUrban.R" file.
+
+```{r}
+
+##############################Cleaning the rdUrbanIbis data###########################
+#Selects only the columns of interest in the dataset
+IbisUrban <- select(rdUrbanIbis, Name:Serotype)
+
+#Renames the columns of interest
+IbisUrban <- rename(IbisUrban,ID = Name,Date = Collection.Date,HgPPM = mg.kg.Hg..PPM.,
+                    Site = Site.Name,UrbanPercent = Site...Urbanized)
+
+#Change the site names to their abbreviations
+IbisUrban$Site[IbisUrban$Site == "Juno Beach"] <- "JB"
+IbisUrban$Site[IbisUrban$Site == "Indian Creek"] <- "ICP"
+IbisUrban$Site[IbisUrban$Site == "Dubois Park"] <- "DUP"
+IbisUrban$Site[IbisUrban$Site == "Dreher Park"] <- "DRP"
+IbisUrban$Site[IbisUrban$Site == "Lion Country Safari"] <- "LCS"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
+IbisUrban$Site[IbisUrban$Site == "Solid Waste Authority "] <- "SWA"
+IbisUrban$Site[IbisUrban$Site == "Gaines Park"] <- "GP"
+IbisUrban$Site[IbisUrban$Site == "Kitching Creek"] <- "KC"
+IbisUrban$Site[IbisUrban$Site == "Kitching Creek "] <- "KC"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE"] <- "LOXNE"
+IbisUrban$Site[IbisUrban$Site == "TetraTech"] <- "TT"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE "] <- "LOXNE"
+IbisUrban$Site[IbisUrban$Site == "Green Cay"] <- "GC"
+IbisUrban$Site[IbisUrban$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee Slough"] <- "LOXS"
+IbisUrban$Site[IbisUrban$Site == "Lake Worth"] <- "LW"
+
+#--------------------------------------------------------------------------------------#
+
+################################Saving the UrbanIbis Data#############################
+#Saving the Ibis Blood 15-17 dataset as an RDS in the processed data folder
+save_data_location3 <- here::here("data", "processed_data", "processedIbisUrban.rds")
+saveRDS(IbisUrban, file = save_data_location3)
+
+#--------------------------------------------------------------------------------------#
+```
+
+This last cleaning section combines the data sheets into one to use for analysis. The urbanization gradient has not been created as of yet, but a meeting this month with those involved with the project will help shed some light on the exact specifics for analysis. This code is located in the "ExploratoryAnalysisScript.R" file.
+
+```{r}
+###############################Completing Combination Data Frames#########################
+#Outer joining IbisBlood10_14 and IbisBlood15_17, keeping all values of the 10_14 dataset
+IbisBlood10_17 <- merge(IbisBlood10_14, IbisBlood15_17, by = c("ID", "Site", "Date", "Sex", "Age",
+                                                              "TotalRBC", "HaeParasit"), all=TRUE)
+#There is no overlap in the ID numbers between the two, so no recapture is assumed.
+
+#This is a left join, this data frame below only contains birds that were in the IbisBlood10_17
+#dataset (all with parasitemia data), with additional information added by the IbisField data. Ibis
+#from the Field data that weren't tested for parasitemia or weren't included on Blood dataset
+#are not included in this dataframe
+
+#IbisBlood10_17(with Field)_(Parasitemia data)
+IbisC <- left_join(IbisBlood10_17, IbisField, by = c("ID", "Site", "Date", "Sex", "Age", "Season", "HabType",
+                                                         "IbisNum", "BirdMassG", "BodyCondScore", "EctoParasitScore",
+                                                         "CulmenLmm", "WingChordLmm", "TarsusLmm", "TarsusWmm"))
+
+#This section classifies the habitat type for the sites without a habitat type.
+IbisC <- IbisC %>%
+        mutate(HabType = ifelse(Site == "ICP", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "JB", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "RP", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "LCS", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "LW", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "SWA", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "E", "Natural", HabType)) %>%
+        mutate(HabType = ifelse(Site == "WPBZ", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "PO", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "PP", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "DRP", "Urban", HabType)) %>%
+        mutate(HabType = ifelse(Site == "SM", "Urban", HabType))
+  
+  
+##This section is adding in the seasons for observations that have collection dates but no season.
+
+#Creating intervals for adding seasons based on the date column
+int1 <- interval(ymd("2012-12-01"), ymd("2012-12-31"))
+int2 <- interval(ymd("2013-06-01"), ymd("2013-08-31"))
+int3 <- interval(ymd("2013-12-01"), ymd("2013-12-31"))
+int4 <- interval(ymd("2014-02-01"), ymd("2014-03-31"))
+
+#Adding seasons to the ibis without them stated based on the date the sameple was collected
+IbisC <- IbisC %>%
+         mutate(Season = ifelse(Date %within% int1, "Fall 2012", Season)) %>%
+         mutate(Season = ifelse(Date %within% int2, "Summer 2013", Season)) %>%
+         mutate(Season = ifelse(Date %within% int3, "Fall 2013", Season)) %>%
+         mutate(Season = ifelse(Date %within% int4, "Spring 2014", Season))
+
+
+#Adding a column for HaeParasit Presence/Absence data
+IbisC <- IbisC %>%
+    mutate(HaeParasitPA = as.integer(HaeParasit > 0 & !is.na(HaeParasit)))
+
+#Adding a column for transformed HaeParasit data on a logarithm base 10 scale,
+#then removing the -Inf values due to there being no parasitemia in those birds. This column
+#then only contains logarithm transformed parasitemia data for birds with a positive value
+#of parasitemia.
+IbisC <- IbisC %>%
+    mutate(HaeParasitLog10 = log10(HaeParasit)) %>%
+    mutate(HaeParasitLog10 = ifelse(HaeParasitLog10 == "-Inf", NA, HaeParasitLog10))
+
+#Changing the BodyCondScore to an ordinal scale
+IbisC <- IbisC %>%
+      mutate(BodyCondScore = recode_factor(BodyCondScore, '1' = 'Emaciated',
+                                           '2' = 'Underweight', '3' = 'Ideal',
+                                           '4' = 'Overweight', '5' = 'Obese',
+                                           .ordered = TRUE))
+
+#Changing the class of some variables for analysis. From character to numeric.
+C2N <- c(16,17,18,21,22,23,24)
+
+IbisC[ , C2N] <- apply(IbisC[ , C2N], 2,
+                       function(x) as.numeric(as.character(x)))
+
+```
+
+This concludes the data cleaning section, we are now ready for the exploratory analysis!
 
 ## Exploratory analysis
 
-## Full analysis
+### Tables
 
-# Discussion
+To start the exploratory analysis, we're going to create some quick tables to get an idea of the metrics for some of the columns of interest.
 
-## Summary and Interpretation
+```{r}
+IbisC %>%
+  count(Sex, wt = HaeParasitPA)
+```
+
+Looking at presence/absence data for haemoproteus parasitemia, there were about double the number of female ibises with active infection compared to the males. 78 of the ibises sampled were negative for haemoproteus infection.  
+
+```{r}
+IbisC %>%
+  count(Age, wt = HaeParasitPA)
+```
+
+Here we can see that there was about 2.7 times more adults sampled with active infection than juvenile ibises. 59 of the sampled ibises with active infection either couldn't be aged or age was not recorded.
+
+```{r}
+IbisC %>%
+  count(Age, Sex, wt = HaeParasitPA)
+```
+
+Combining age and sex, we can see that adult females had the highest number of active infections. Categories with missing numbers are prevalent.
+
+```{r}
+IbisC %>%
+  count(Site, wt = HaeParasitPA)
+```
+Looking at site, SWA, ICP, and DRP were the sites with the highest number of sampled ibises with active infection.
+
+```{r}
+IbisC %>%
+  count(Season, wt = HaeParasitPA)
+```
+Looking at season sampled, Spring 2016 had the highest number of sampled ibises with active infection, followed by Summer 2013, Spring 2017, and Spring 2014.
+
+```{r}
+IbisC %>%
+  count(BodyCondScore, Age, wt = HaeParasitPA)
+```
+Looking at body condition score, the majority of the birds sampled with active infection were an ideal weight or underweight. This lets us know that an active infection didn't affect body condition too harshly on these birds.
+
+### Figures
+
+Now we can move onto creating some figures for the data to see any patterns visually.
+
+Figure 1: Haemoproteus parasitemia from sampled infected Ibises from 2010-2017 by habitat type
+```{r}
+ExpFigure1 <-ggplot(IbisC) +
+  geom_point(aes(x = Date, y = HaeParasitLog10, color = HabType)) +
+  ggtitle("Haemoproteus parasitemia from sampled infected Ibises from 2010-2017 by habitat type") +
+  xlab("Date") +
+  ylab("Haemoproteus Parasitemia (Log base 10)") +
+  scale_color_discrete("Habitat Type", na.translate = F) +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10))
+
+Figure_file1 <- here("results", "ExploratoryAnalysis", "ExpFigure1.png")
+ggsave(filename = Figure_file1,plot = ExpFigure1)
+
+ExpFigure1
+```
+
+This scatterplot graphs the sample dates chronologically against the parasitemia measured from the sampled ibis on a transformed log base 10 scale. Habitat type is depicted by color of the dots. Overall, there is a general narrowing of the data over time with a slight negative correlation. There isn't a clear difference between natural and urban habitat types when it comes to amount of parasitemia. 
+
+Figure 2: Haemoproteus parasitemia from adult and juvenile sampled Ibises
+```{r}
+ExpFigure2 <- IbisC %>%
+  drop_na(Age) %>%
+  ggplot() +
+  geom_violin(aes(x = Age, y = HaeParasit)) +
+  ggtitle("Haemoproteus parasitemia from adult and juvenile sampled Ibises") +
+  xlab("Age") +
+  ylab("Haemoproteus Parasitemia") +
+  scale_y_continuous(limits = c(0, 0.1)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10))
+
+Figure_file2 <- here("results", "ExploratoryAnalysis", "ExpFigure2.png")
+ggsave(filename = Figure_file2, plot = ExpFigure2)
+
+ExpFigure2
+```
+
+This violin plot graphs the haemoproteus parasitemia distribution for the adult and juvenile Ibises sampled. The majority of the parasitemia values are on the lower end for both adults and juveniles. The distribution for adults reaches higher than juveniles. The overall structure for the adult distribution is higher and skinnier, while juveniles have more of their parasitemias lower in value. 
+
+Figure 3: Haemoproteus parasitemia from sampled Ibises by sex
+```{r}
+ExpFigure3 <- IbisC %>%
+  drop_na(Sex) %>%
+  ggplot() +
+  geom_boxplot(aes(x = Sex, y = HaeParasit)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  ggtitle("Haemoproteus parasitemia from sampled Ibises by sex") +
+  xlab("Sex") +
+  ylab("Haemoproteus Parasitemia") +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10))
+
+Figure_file3 <- here("results", "ExploratoryAnalysis", "ExpFigure3.png")
+ggsave(filename = Figure_file3, plot = ExpFigure3)
+
+ExpFigure3
+```
+
+The haemoproteus parasitemia distributions between sexes is extremely similar. The median value for males is slightly higher than females. The majority of the measured parasitemias are between 0.0 and 0.1. 
+
+Figure 4: Haemoproteus parasitemia by total female and male Ibis mass
+```{r}
+ExpFigure4 <- IbisC %>%
+  drop_na(BirdMassG, Sex) %>%
+  ggplot() +
+  geom_point(aes(x = BirdMassG, y = HaeParasitLog10, color = Sex)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_continuous(limits = c(130, 1240)) +
+  ggtitle("Haemoproteus parasitemia by total female and male Ibis mass") +
+  xlab("Total mass of Ibis (g)") +
+  ylab("Haemoproteus Parasitemia (Log base 10)") +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10))
+
+Figure_file4 <- here("results", "ExploratoryAnalysis", "ExpFigure4.png")
+ggsave(filename = Figure_file4, plot = ExpFigure4)
+
+ExpFigure4
+```
+
+Looking at the plot, male birds seem to weigh more than females. However, when comparing the parasitemia between females and males, there isn't a clear difference between the two.
+
+Figure 5: Haemoproteus parasitemia by female and male Ibis mass and body condition score
+```{r}
+ExpFigure5 <- IbisC %>%
+  drop_na(BirdMassG, BodyCondScore, Sex) %>%
+  ggplot() +
+  geom_point(aes(x = BirdMassG, y = HaeParasitLog10, color = BodyCondScore)) +
+  facet_wrap(~ Sex) +
+  ggtitle("Haemoproteus parasitemia by female and male Ibis mass and body condition score") +
+  xlab("Total mass of Ibis (g)") +
+  ylab("Haemoproteus Parasitemia (Log base 10)") +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10)) +
+  scale_x_continuous(limits = c(130, 1240)) +
+  scale_color_discrete("Body Condition", na.translate = F)
+
+Figure_file5 <- here("results", "ExploratoryAnalysis", "ExpFigure5.png")
+ggsave(filename = Figure_file5, plot = ExpFigure5)
+
+ExpFigure5
+```
+
+Looking at this plot, there are more underweight female ibises with higher parasitemias compared to males. This could be due to the higher number of sampled females though. 
+
+Figure 6: Haemoproteus parasitemia by sample site and habitat type
+```{r}
+ExpFigure6 <- IbisC %>%
+  drop_na(HabType, Site) %>%
+  ggplot() +
+  geom_point(aes(x = Site, y = log10(HaeParasit), color = HabType)) +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        legend.title = element_text(size = 10)) +
+  ggtitle("Haemoproteus parasitemia by sample site and habitat type") +
+  xlab("Sample Site") +
+  ylab("Haemoproteus Parasitemia (Log base 10)") +
+  scale_color_discrete("Habitat Type", na.translate = F) 
+
+Figure_file6 <- here("results", "ExploratoryAnalysis", "ExpFigure6.png")
+ggsave(filename = Figure_file6, plot = ExpFigure6)
+
+ExpFigure6
+```
+
+Looking at this plot broadly, it seems that the sites with a natural habitat have a slightly lower average parasitemia than the sites with an urban habitat. 
+
+Overall, there are no huge patterns or clear differences between covariates and variates so far. Statistical analyses may pick up on any significant differences later on, but I will return to the exploratory analysis as I continue with the project. I will also be meeting with those involved with the project to discuss as well.
 
 
-## Strengths and Limitations
 
-
-## Conclusions
-
-
-# References
-
-
-# Summary/Abstract
-_Write a summary of your project._
 
 
 

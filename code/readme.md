@@ -1,10 +1,17 @@
-Place your various R or Rmd scripts in the appropriate folders.
+The R scripts in this folder are the code that produce both the processed data and analyses. In order
+to fully reproduce the analysis, the R files in processing_code should be ran first and then the R files
+in analysis_code. Below details the order in which to run the files in each folder.
 
-You can either have fewer large scripts, or multiple scripts that do only specific actions. Those can be R scripts or Rmd files. In either case, document the scripts and what goes on in them so well that someone else (including future you) can easily figure out what is happening.
+1. processing_code:
+	1. ProcessingScriptIbisBloodData.R
+	2. ProcessingScriptIbisFieldData.R
+	3. ProcessingScriptIbisUrban.R
 
-The scripts should load the appropriate data (e.g. raw or processed), perform actions, and save results (e.g. processed data, figures, computed values) in the appropriate folders. Document somewhere what inputs each script takes and where output is placed. 
+2. analysis_code:
+	1. ExploratoryAnalysisScript.R
+	
 
-If scripts need to be run in a specific order, document this. Either as comments in the script, or in a separate text file such as this. Ideally of course in both locations.
+The code in the processing_code directory will load all the raw datasets from the raw_data directory,
+clean and process them, then save the processed datasets in the processed_data directory.
 
-
-Depending on your specific project, you might want to have further sub-folders.
+The code in the analysis_code directory will load processed datasets from the processed_data directory in order to perform the analyses.

@@ -1,4 +1,3 @@
-Place all results from your analysis (figures, tables, computed values) here.
-
-Depending on project size, you can place everything in this folder, or use sub-folders to further structure things. For instance you could have separate figures/tables/numeric folders, or if you analyze multiple datasets, you could have folders for each dataset, or if you apply several distinct models you could have folders for each model. The structure is up to you, just make it understandable for you and others.
+This folder contains all of the figures and results generated from the .R scripts in the analysis_code
+directory. At the current moment, the only figures are those generated from the Exploratory Analysis.
 
