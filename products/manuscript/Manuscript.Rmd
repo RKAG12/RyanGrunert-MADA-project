@@ -41,7 +41,7 @@ Two datasheets have overlapping information (Ibis_Blood_ParasiteData_2017 and Ib
 
 ```{r}
 #Setting the path to the Ibis blood parasite spreadsheet
-data_locationIbisB <- here::here("data","raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
+data_locationIbisB <- here::here("raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
 
 #Loads the raw Ibis blood data excel sheet from 2015-2017
 rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
@@ -58,7 +58,7 @@ The main variables I'm interested in for these two sheets above are "Haemoproteu
 
 ```{r}
 #Setting the path to the Ibis field data spreadsheet
-data_locationIbisF <- here::here("data","raw_data","IbisFieldDataOct19_2017.xlsx")
+data_locationIbisF <- here::here("raw_data","IbisFieldDataOct19_2017.xlsx")
 
 #Loads the raw Ibis field data excel sheet
 rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
@@ -70,7 +70,7 @@ This dataset is the most organized sheet, but columns of interest will be extrac
 
 ```{r}
 #Setting the path to the first Ibis supplemental excel sheet (Urban Gradients)
-data_locationIbisUr <- here::here("data","raw_data","100IbisID_UrbanGradient.xlsx")
+data_locationIbisUr <- here::here("raw_data","100IbisID_UrbanGradient.xlsx")
 
 #Loads the raw Ibis Urban Gradient supplemental data sheet
 rdUrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
@@ -83,7 +83,7 @@ These samples from this datasheet will be used in conjunction with the two main 
 
 ```{r}
 #Setting the path to the second Ibis supplemental excel sheet (Salmonella)
-data_locationIbisSal <- here::here("data","raw_data","SalmonellaFieldSerotypesAug27_2018.xlsx")
+data_locationIbisSal <- here::here("raw_data","SalmonellaFieldSerotypesAug27_2018.xlsx")
 
 #Loads the raw Ibis Urban Gradient supplemental data sheet
 SalIbis <- read.xlsx(data_locationIbisSal, sheetName = "ALL Positives")
@@ -286,11 +286,11 @@ IbisBlood15_17 <- IbisBlood15_17[-c(401, 402, 403, 404, 405, 406),]
 ###############################Saving the Cleaned Datasets###########################
 
 #Saving the Ibis Blood 10-14 dataset as an RDS in the processed data folder
-save_data_location <- here::here("data", "processed_data", "processedIbisBlood10_14.rds")
+save_data_location <- here::here("processed_data", "processedIbisBlood10_14.rds")
 saveRDS(IbisBlood10_14, file = save_data_location)
 
 #Saving the Ibis Blood 15-17 dataset as an RDS in the processed data folder
-save_data_location2 <- here::here("data", "processed_data", "processedIbisBlood15_17.rds")
+save_data_location2 <- here::here("processed_data", "processedIbisBlood15_17.rds")
 saveRDS(IbisBlood15_17, file = save_data_location2)
 
 ```

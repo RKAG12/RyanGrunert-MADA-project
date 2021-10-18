@@ -1,9 +1,6 @@
-###############################
-# Processing Script 1 - ProcessingScriptIbisBloodData.R
-#This script is to load, clean, and process the main parasitemia dataset containing
-#Ibis parasitemia data. Other scripts are used for cleaning and processing the
-#Ibis urban and Salmonella datasheets, and Ibis field datasheet.
-
+###################
+#Processing Script
+#This script loads and cleans raw data for the Ibis data analysis process. It then saves processed data for further analysis.
 
 ###############################Loading all required packages###########################
 library(here) #to set paths
@@ -14,17 +11,22 @@ library(janitor) #to help clean up dates and tidy data
 
 #--------------------------------------------------------------------------------------#
 
-
 ##################################Inputting Raw Data###################################
 #Setting the path to the Ibis blood parasite spreadsheet
-data_locationIbisB <- here::here("data","raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
+data_locationIbisB <- here::here("raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
+#Setting the path to the Ibis field data spreadsheet
+data_locationIbisF <- here::here("raw_data","IbisFieldDataOct19_2017.xlsx")
+#Setting the path to the first Ibis supplemental excel sheet (Urban Gradients)
+data_locationIbisUr <- here::here("raw_data","100IbisID_UrbanGradient.xlsx")
 #Loads the raw Ibis blood data excel sheet from 2015-2017
 rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
 #Loads the raw Ibis blood data excel sheet from 2010-2014
 rdIbisBlood10_14 <- read.xlsx(data_locationIbisB, sheetName = "2010-2014")
-
+#Loads the raw Ibis field data excel sheet
+rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
+#Loads the raw Ibis Urban Gradient supplemental data sheet
+rdUrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
 #--------------------------------------------------------------------------------------#
-
 
 ##############################Cleaning the rdIbisBlood10_14 data###########################
 IbisBlood10_14 <- rename(rdIbisBlood10_14, ID = X.) #renames the ID column
@@ -94,7 +96,7 @@ IbisBlood15_17 <- select(IbisBlood15_17,ID,Site.Name,Date,PCR.sex,Age,Season,Hab
                          Avg.RBC.FOV,Ibis..,Total.mass..g.,Mass.bag..g.,Mass.bird..g.,Body.condition.score..1.5.,
                          Ectoparasite.score..1.5.,Culmen.length..mm.,Wing.chord.length..mm.,
                          Tarsus.length..mm.,Tarsus.width..mm.)
-                         
+
 ####Renaming the columns 
 IbisBlood15_17 <- rename(IbisBlood15_17,Site = Site.Name,Sex = PCR.sex,HabType = Habitat.type,TotalRBC = Total.RBC,NumHae = X..Haemoproteus,
                          HaeParasit = Haemoproteus.parasitemia.,AvgRBC = Avg.RBC.FOV,
@@ -186,21 +188,127 @@ IbisBlood15_17 <- IbisBlood15_17[-c(401, 402, 403, 404, 405, 406),]
 #This completes the cleaning phase for IbisBlood15_17
 #------------------------------------------------------------------------------------#
 
+######################### #Cleaning the rdIbisField Data###############################
+
+IbisField <- rename(rdIbisField, ID = ID..NSFSITE...) #renames the ID column
+
+#Selecting the columns of interest to this analysis from the datasheet
+IbisField <- select(IbisField,ID,Site.Name,Latitude,Longitude,Date,PCR.Sex,Age,Season,
+                    Habitat.type,Ibis.number,Mass.bird..g.,Body.condition.score..1.5.,
+                    Ectoparasite.score..1.5.,Culmen.length..mm.,Wing.chord.length..mm.,
+                    Tarsus.length..mm.,Tarsus.width..mm.,Habituation.score.of.flock..1.5.)
+
+#Renaming the columns of interest, also matching the other cleaned datasets
+IbisField <- rename(IbisField,Site = Site.Name,Lat = Latitude,Long = Longitude,Sex = PCR.Sex,
+                    HabType = Habitat.type,IbisNum = Ibis.number,BirdMassG = Mass.bird..g.,
+                    BodyCondScore = Body.condition.score..1.5.,EctoParasitScore = Ectoparasite.score..1.5.,
+                    CulmenLmm = Culmen.length..mm.,WingChordLmm = Wing.chord.length..mm.,
+                    TarsusLmm = Tarsus.length..mm.,TarsusWmm = Tarsus.width..mm.,HabFlockScore = Habituation.score.of.flock..1.5.)
+
+#This dataset has "-999" values which mean they are intentionally left blank,
+#Birds with an ID number of "-999" represent sites that didn't catch any birds,
+#but had weather data collected. This code deletes those observations.
+IbisField <- IbisField[!(IbisField$ID == "-999"),]
+
+####Site
+#These site location abbreviations are the same across datasets
+IbisField$Site[IbisField$Site == "Busch Wildlife Sanctuary"] <- "BWS"
+IbisField$Site[IbisField$Site == "Cat House (Bonnie's, Richard Lane)"] <- "CAT"
+IbisField$Site[IbisField$Site == "Dubois Park"] <- "DUP"
+IbisField$Site[IbisField$Site == "DuBois Park"] <- "DUP"
+IbisField$Site[IbisField$Site == "Dreher Park"] <- "DRP"
+IbisField$Site[IbisField$Site == "Fisheating Creek"] <- "FC"
+IbisField$Site[IbisField$Site == "Green Cay"] <- "GC"
+IbisField$Site[IbisField$Site == "Gaines Park"] <- "GP"
+IbisField$Site[IbisField$Site == "Indian Creek"] <- "ICP"
+IbisField$Site[IbisField$Site == "Juno Beach"] <- "JB"
+IbisField$Site[IbisField$Site == "Juno Beach "] <- "JB"
+IbisField$Site[IbisField$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
+IbisField$Site[IbisField$Site == "Kitching Creek"] <- "KC"
+IbisField$Site[IbisField$Site == "Lion Country Safari"] <- "LCS"
+IbisField$Site[IbisField$Site == "Lake Worth"] <- "LW"
+IbisField$Site[IbisField$Site == "Loxahatchee Slough"] <- "LOXS"
+IbisField$Site[IbisField$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
+IbisField$Site[IbisField$Site == "Loxahatchee/LILA Cell B2"] <- "LOXB2"
+IbisField$Site[IbisField$Site == "Loxahatchee NE "] <- "LOXNE"
+IbisField$Site[IbisField$Site == "Palm Beach Zoo"] <- "WPBZ"
+IbisField$Site[IbisField$Site == "Royal Palm"] <- "RP"
+IbisField$Site[IbisField$Site == "CROW Wildlife Rehabilitation Center"] <- "CROW"
+IbisField$Site[IbisField$Site == "Solid Waste Authority"] <- "SWA"
+IbisField$Site[IbisField$Site == "TetraTech"] <- "TT"
+
+####Sex Column
+#This replaces the -999 and FAIL values with NA. The IbisBlood datasheets carry more sex data for the birds
+IbisField$Sex[IbisField$Sex == "FAIL"] <- NA
+
+####Age Column
+IbisField$Age[IbisField$Age == "Adult"] <- "A"
+IbisField$Age[IbisField$Age == "3rd year"] <- "J"
+IbisField$Age[IbisField$Age == "2nd year"] <- "J"
+IbisField$Age[IbisField$Age == "1st year"] <- "J"
+IbisField$Age[IbisField$Age == "NA"] <- NA
+IbisField$Age[IbisField$Age == "Adult "] <- "A"
+IbisField$Age[IbisField$Age == "2nd year "] <- "J"
+IbisField$Age[IbisField$Age == "Juvenile"] <- "J"
+IbisField$Age[IbisField$Age == "2nd Year"] <- "J"
+
+#Replacing all -999 values in the dataset with NA
+IbisField[IbisField == -999] <- NA
+
+#Replacing NA text strings with regular NA values in multiple columns
+IbisField$BodyCondScore[IbisField$BodyCondScore == "NA"] <- NA
+IbisField$HabFlockScore[IbisField$HabFlockScore == "NA"] <- NA
+IbisField$CulmenLmm[IbisField$CulmenLmm == "NA"] <- NA
+IbisField$WingChordLmm[IbisField$WingChordLmm == "NA"] <- NA
+IbisField$TarsusLmm[IbisField$TarsusLmm == "NA"] <- NA
+IbisField$TarsusWmm[IbisField$TarsusWmm == "NA"] <- NA
+
+#--------------------------------------------------------------------------------------#
+
+##############################Cleaning the rdUrbanIbis data###########################
+#Selects only the columns of interest in the dataset
+IbisUrban <- select(rdUrbanIbis, Name:Serotype)
+
+#Renames the columns of interest
+IbisUrban <- rename(IbisUrban,ID = Name,Date = Collection.Date,HgPPM = mg.kg.Hg..PPM.,
+                    Site = Site.Name,UrbanPercent = Site...Urbanized)
+
+#Change the site names to their abbreviations
+IbisUrban$Site[IbisUrban$Site == "Juno Beach"] <- "JB"
+IbisUrban$Site[IbisUrban$Site == "Indian Creek"] <- "ICP"
+IbisUrban$Site[IbisUrban$Site == "Dubois Park"] <- "DUP"
+IbisUrban$Site[IbisUrban$Site == "Dreher Park"] <- "DRP"
+IbisUrban$Site[IbisUrban$Site == "Lion Country Safari"] <- "LCS"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
+IbisUrban$Site[IbisUrban$Site == "Solid Waste Authority "] <- "SWA"
+IbisUrban$Site[IbisUrban$Site == "Gaines Park"] <- "GP"
+IbisUrban$Site[IbisUrban$Site == "Kitching Creek"] <- "KC"
+IbisUrban$Site[IbisUrban$Site == "Kitching Creek "] <- "KC"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE"] <- "LOXNE"
+IbisUrban$Site[IbisUrban$Site == "TetraTech"] <- "TT"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE "] <- "LOXNE"
+IbisUrban$Site[IbisUrban$Site == "Green Cay"] <- "GC"
+IbisUrban$Site[IbisUrban$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
+IbisUrban$Site[IbisUrban$Site == "Loxahatchee Slough"] <- "LOXS"
+IbisUrban$Site[IbisUrban$Site == "Lake Worth"] <- "LW"
+
+#--------------------------------------------------------------------------------------#
+
 ###############################Saving the Cleaned Datasets###########################
 
 #Saving the Ibis Blood 10-14 dataset as an RDS in the processed data folder
-save_data_location <- here::here("data", "processed_data", "processedIbisBlood10_14.rds")
+save_data_location <- here::here("processed_data", "processedIbisBlood10_14.rds")
 saveRDS(IbisBlood10_14, file = save_data_location)
 
 #Saving the Ibis Blood 15-17 dataset as an RDS in the processed data folder
-save_data_location2 <- here::here("data", "processed_data", "processedIbisBlood15_17.rds")
+save_data_location2 <- here::here("processed_data", "processedIbisBlood15_17.rds")
 saveRDS(IbisBlood15_17, file = save_data_location2)
 
+#Saving the Ibis Field dataset as an RDS in the processed data folder
+save_data_location3 <- here::here("processed_data", "processedIbisFielddata.rds")
+saveRDS(IbisField, file = save_data_location3)
 
-
-
-
-
-
-
+#Saving the Urban Ibis dataset as an RDS in the processed data folder
+save_data_location3 <- here::here("processed_data", "processedIbisUrban.rds")
+saveRDS(IbisUrban, file = save_data_location3)
 

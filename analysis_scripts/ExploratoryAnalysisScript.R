@@ -16,10 +16,10 @@ library(lubridate) #work with date/time data
 ###############################Loading all datasets####################################
 #This code loads all of the processed and cleaned Ibis data
 
-data_location1 <- here::here("data","processed_data","processedIbisBlood10_14.rds")
-data_location2 <- here::here("data","processed_data","processedIbisBlood15_17.rds")
-data_location3 <- here::here("data","processed_data","processedIbisFielddata.rds")
-data_location4 <- here::here("data","processed_data","processedIbisUrban.rds")
+data_location1 <- here::here("processed_data","processedIbisBlood10_14.rds")
+data_location2 <- here::here("processed_data","processedIbisBlood15_17.rds")
+data_location3 <- here::here("processed_data","processedIbisFielddata.rds")
+data_location4 <- here::here("processed_data","processedIbisUrban.rds")
 
 IbisBlood10_14 <- readRDS(data_location1)
 IbisBlood15_17 <- readRDS(data_location2)
@@ -136,7 +136,7 @@ ExpFigure1 <-ggplot(IbisC) +
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file1 <- here("results", "ExploratoryAnalysis", "ExpFigure1.png")
+Figure_file1 <- here("results", "Figures", "ExpFigure1.png")
 ggsave(filename = Figure_file1,plot = ExpFigure1)
 
 #########Plot 2: Violin plot of haemoproteus parasitemia vs adult and juvenile
@@ -154,7 +154,7 @@ ExpFigure2 <- IbisC %>%
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file2 <- here("results", "ExploratoryAnalysis", "ExpFigure2.png")
+Figure_file2 <- here("results", "Figures", "ExpFigure2.png")
 ggsave(filename = Figure_file2, plot = ExpFigure2)
 
 #########Plot 3: Boxplot of haemoproteus parasitemia vs sex
@@ -172,7 +172,7 @@ ExpFigure3 <- IbisC %>%
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file3 <- here("results", "ExploratoryAnalysis", "ExpFigure3.png")
+Figure_file3 <- here("results", "Figures", "ExpFigure3.png")
 ggsave(filename = Figure_file3, plot = ExpFigure3)
 
 ##########Plot 4: Scatterplot of haemoproteus parasitemia vs bird weight with sex
@@ -190,7 +190,7 @@ ExpFigure4 <- IbisC %>%
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file4 <- here("results", "ExploratoryAnalysis", "ExpFigure4.png")
+Figure_file4 <- here("results", "Figures", "ExpFigure4.png")
 ggsave(filename = Figure_file4, plot = ExpFigure4)
 
 ##########Plot 5: Scatterplot of haemoproteus parasitemia vs bird weight with body condition score
@@ -211,7 +211,7 @@ ExpFigure5 <- IbisC %>%
   scale_x_continuous(limits = c(130, 1240)) +
   scale_color_discrete("Body Condition", na.translate = F)
 
-Figure_file5 <- here("results", "ExploratoryAnalysis", "ExpFigure5.png")
+Figure_file5 <- here("results", "Figures", "ExpFigure5.png")
 ggsave(filename = Figure_file5, plot = ExpFigure5)
 
 ###########Plot 6: Scatterplot of haemoptroteus parasitemia vs sample site and habitat type
@@ -229,6 +229,6 @@ ExpFigure6 <- IbisC %>%
   ylab("Haemoproteus Parasitemia (Log base 10)") +
   scale_color_discrete("Habitat Type", na.translate = F) 
 
-Figure_file6 <- here("results", "ExploratoryAnalysis", "ExpFigure6.png")
+Figure_file6 <- here("results", "Figures", "ExpFigure6.png")
 ggsave(filename = Figure_file6, plot = ExpFigure6)
 
