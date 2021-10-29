@@ -10,23 +10,25 @@ This data analysis project uses R, Rmarkdown (and variants, e.g. bookdown), Gith
 
 # Main Directory Structure
 
-* All data is located in the subfolders inside the `data` folder.
-* All code is located in the `code` folder and subfolders.
+* All data is located in the 'raw_data' and 'processed_data' folders.
+* All code is located in the 'processing_script' and 'analysis_scripts' folders.
 * All results (figures, tables, computed values) are located in the `results` folder and subfolders.
 * All products (manuscripts, supplementary files) are located in the  `products` subfolders.
 * See the various `readme.md` files in those folders for some more information.
 
 # Content 
 
-The 'code' folder contains two subfolders: 'processing_code' and 'analysis_code'
- 	- 'processing_code' contains 3 R scripts that load the raw datasets, performs all the cleaning needed, and saves the results in the 'processed_data' folder.
-	- 'analysis_code' contains 1 R script currently, that loads the processed datasets and performs an Exploratory Analysis. Afterwards it saves the results and figures into the ExploratoryAnalysis folder in the results folder.
+The processing script should be run first, and than the analysis scripts.
+
+The 'code' folder contains two subfolders: 'processing_script' and 'analysis_scripts'
+ 	- 'processing_script' contains 1 R script that loads the unprocessed datasets, cleans them, and saves them in the 'processed_data' folder.
+	- 'analysis_scripts' contains 2 R scripts currently. 'ExploratoryAnalysisScript.R' loads the processed data and performs the exploratory analyses, then saves the generated figures in the 'Figures' subfolder inside the 'results' folder. 'StatisticalAnalysisModels.R' loads the processed data, generates the statistical models, and saves the results in the 'Models' and 'Tables' subfolders inside the 'results' folder.
 	
 The 'data' folder contains two subfolders: 'raw_data' and 'processed_data'
 	- 'raw_data' contains the raw datasets used for the analysis. These should not be edited in any way.
 	- 'processed_data' contains the processed datasets that were created as a result of the processing_code scripts, and were saved as .RDS files.
 
-The 'results' folder currently only contains one folder, 'ExploratoryAnalysis'. This contains the figures created as a result of the Exploratory Analysis script.
+The 'results' folder contains 3 subfolders, 'Figures', 'Models', and 'Tables'. These contains saved Rda files from the analysis scripts.
 
 The 'products' folder currently contains the references, metadata for every dataset, and 'manuscript' folder. The primary report is written in Rmarkdown. Inside the 'manuscript' folder, there is the main .Rmd manuscript file that can be used to recreate all the analyses if one wanted. Included there is also an html and word output for the .Rmd file.
 	

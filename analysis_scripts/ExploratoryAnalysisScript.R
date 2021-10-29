@@ -103,10 +103,15 @@ C2N <- c(16,17,18,21,22,23,24)
 IbisC[ , C2N] <- apply(IbisC[ , C2N], 2,
                        function(x) as.numeric(as.character(x)))
 
+##############################Saving the Complete Dataset#########################
+
+save_data_location <- here::here("processed_data", "CompleteIbisDataset.rds")
+
+saveRDS(IbisC, file = save_data_location)
+
 ###############################Exploratory Tables#################################
 IbisC %>%
 count(Sex, wt = HaeParasitPA)
-
 
 IbisC %>%
   count(Age, wt = HaeParasitPA)
@@ -231,4 +236,8 @@ ExpFigure6 <- IbisC %>%
 
 Figure_file6 <- here("results", "Figures", "ExpFigure6.png")
 ggsave(filename = Figure_file6, plot = ExpFigure6)
+
+
+
+
 
