@@ -19,12 +19,10 @@ library(lubridate) #work with date/time data
 data_location1 <- here::here("processed_data","processedIbisBlood10_14.rds")
 data_location2 <- here::here("processed_data","processedIbisBlood15_17.rds")
 data_location3 <- here::here("processed_data","processedIbisFielddata.rds")
-data_location4 <- here::here("processed_data","processedIbisUrban.rds")
 
 IbisBlood10_14 <- readRDS(data_location1)
 IbisBlood15_17 <- readRDS(data_location2)
 IbisField <- readRDS(data_location3)
-IbisUrban <- readRDS(data_location4)
 
 #--------------------------------------------------------------------------------------#
 
@@ -97,11 +95,17 @@ IbisC <- IbisC %>%
                                            '4' = 'Overweight', '5' = 'Obese',
                                            .ordered = TRUE))
       
-#Changing the class of some variables for analysis. From character to numeric.
+#Changing the class of some variables for graphing. From character to numeric.
 C2N <- c(16,17,18,21,22,23,24)
 
 IbisC[ , C2N] <- apply(IbisC[ , C2N], 2,
                        function(x) as.numeric(as.character(x)))
+
+#Deleting sites that hinder the model, these sites have no presence of Haemoproteus #ERROR: factor Site has new levels CAT, E, SM, WPBZ
+IbisC <- subset(IbisC, Site!="CAT" &
+                     Site!="E" &
+                     Site!="SM" &
+                     Site!="WPBZ" )
 
 ##############################Saving the Complete Dataset#########################
 
@@ -110,6 +114,9 @@ save_data_location <- here::here("processed_data", "CompleteIbisDataset.rds")
 saveRDS(IbisC, file = save_data_location)
 
 ###############################Exploratory Tables#################################
+IbisC %>%
+  count(HaeParasitPA, wt = HaeParasitPA)
+
 IbisC %>%
 count(Sex, wt = HaeParasitPA)
 
@@ -129,7 +136,7 @@ IbisC %>%
   count(BodyCondScore, Age, wt = HaeParasitPA)
 
 ################################Exploratory Graphs#####################################
-########Plot 1
+########Plot 1: Scatter Plot of Haemoproteus parasitemia, sample date and habitat type
 ExpFigure1 <-ggplot(IbisC) +
   geom_point(aes(x = Date, y = HaeParasitLog10, color = HabType)) +
   ggtitle("Haemoproteus parasitemia from sampled infected Ibises from 2010-2017 by habitat type") +

@@ -16,16 +16,12 @@ library(janitor) #to help clean up dates and tidy data
 data_locationIbisB <- here::here("raw_data","Ibis_Blood_ParasiteData_2017.xlsx")
 #Setting the path to the Ibis field data spreadsheet
 data_locationIbisF <- here::here("raw_data","IbisFieldDataOct19_2017.xlsx")
-#Setting the path to the first Ibis supplemental excel sheet (Urban Gradients)
-data_locationIbisUr <- here::here("raw_data","100IbisID_UrbanGradient.xlsx")
 #Loads the raw Ibis blood data excel sheet from 2015-2017
 rdIbisBlood15_17 <- read.xlsx(data_locationIbisB, sheetName = "2015-2017")
 #Loads the raw Ibis blood data excel sheet from 2010-2014
 rdIbisBlood10_14 <- read.xlsx(data_locationIbisB, sheetName = "2010-2014")
 #Loads the raw Ibis field data excel sheet
 rdIbisField <- read.xlsx(data_locationIbisF, sheetName = "All capture data")
-#Loads the raw Ibis Urban Gradient supplemental data sheet
-rdUrbanIbis <- read.xlsx(data_locationIbisUr, sheetName = "Samples by Date")
 #--------------------------------------------------------------------------------------#
 
 ##############################Cleaning the rdIbisBlood10_14 data###########################
@@ -265,35 +261,6 @@ IbisField$TarsusWmm[IbisField$TarsusWmm == "NA"] <- NA
 
 #--------------------------------------------------------------------------------------#
 
-##############################Cleaning the rdUrbanIbis data###########################
-#Selects only the columns of interest in the dataset
-IbisUrban <- select(rdUrbanIbis, Name:Serotype)
-
-#Renames the columns of interest
-IbisUrban <- rename(IbisUrban,ID = Name,Date = Collection.Date,HgPPM = mg.kg.Hg..PPM.,
-                    Site = Site.Name,UrbanPercent = Site...Urbanized)
-
-#Change the site names to their abbreviations
-IbisUrban$Site[IbisUrban$Site == "Juno Beach"] <- "JB"
-IbisUrban$Site[IbisUrban$Site == "Indian Creek"] <- "ICP"
-IbisUrban$Site[IbisUrban$Site == "Dubois Park"] <- "DUP"
-IbisUrban$Site[IbisUrban$Site == "Dreher Park"] <- "DRP"
-IbisUrban$Site[IbisUrban$Site == "Lion Country Safari"] <- "LCS"
-IbisUrban$Site[IbisUrban$Site == "Loxahatchee Wildlife Refuge"] <- "LOXWR"
-IbisUrban$Site[IbisUrban$Site == "Solid Waste Authority "] <- "SWA"
-IbisUrban$Site[IbisUrban$Site == "Gaines Park"] <- "GP"
-IbisUrban$Site[IbisUrban$Site == "Kitching Creek"] <- "KC"
-IbisUrban$Site[IbisUrban$Site == "Kitching Creek "] <- "KC"
-IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE"] <- "LOXNE"
-IbisUrban$Site[IbisUrban$Site == "TetraTech"] <- "TT"
-IbisUrban$Site[IbisUrban$Site == "Loxahatchee NE "] <- "LOXNE"
-IbisUrban$Site[IbisUrban$Site == "Green Cay"] <- "GC"
-IbisUrban$Site[IbisUrban$Site == "J.W. Corbett Wildlife Management Area"] <- "JWC"
-IbisUrban$Site[IbisUrban$Site == "Loxahatchee Slough"] <- "LOXS"
-IbisUrban$Site[IbisUrban$Site == "Lake Worth"] <- "LW"
-
-#--------------------------------------------------------------------------------------#
-
 ###############################Saving the Cleaned Datasets###########################
 
 #Saving the Ibis Blood 10-14 dataset as an RDS in the processed data folder
@@ -308,7 +275,4 @@ saveRDS(IbisBlood15_17, file = save_data_location2)
 save_data_location3 <- here::here("processed_data", "processedIbisFielddata.rds")
 saveRDS(IbisField, file = save_data_location3)
 
-#Saving the Urban Ibis dataset as an RDS in the processed data folder
-save_data_location3 <- here::here("processed_data", "processedIbisUrban.rds")
-saveRDS(IbisUrban, file = save_data_location3)
 
