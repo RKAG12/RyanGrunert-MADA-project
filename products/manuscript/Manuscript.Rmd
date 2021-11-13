@@ -21,326 +21,235 @@ library(tidyverse) #all required data manipulation packages
 library(xlsx) #to read in excel spreadsheets
 library(janitor) #To assist in cleaning up dates and tidy data
 library(lubridate) #To extract times from raw data
+library(tidymodels) #to run the statistical analyses
+library(ranger) #implementation of random forests
+library(vip) #For plotting decision tree model
+library(rpart) #For plotting machine learning models
+library(rpart.plot) #For plotting machine learning models
+set.seed(144)
+#Loading in the complete Ibis Dataset
+data_location1 <- here::here("processed_data","CompleteIbisDataset.rds")
+IbisC <- readRDS(data_location1)
+#Loading required materials - Figures
+#Exploratory Figures
+figure_Exp_1 <- here::here("results", "Figures", "ExpFigure1.png")
+figure_Exp_4 <- here::here("results", "Figures", "ExpFigure4.png")
+figure_Exp_6 <- here::here("results", "Figures", "ExpFigure6.png")
+#Machine Learning Model Diagnostic Figures
+figure_ML_1 <- here::here("results", "Figures", "ImpPlotDT.jpeg")
+figure_ML_2 <- here::here("results", "Figures", "DTTree.jpeg")
+figure_ML_3 <- here::here("results", "Figures", "LassoFig.jpeg")
+figure_ML_4 <- here::here("results", "Figures", "ImpPlotRF.jpeg")
+figure_ML_5 <- here::here("results", "Figures", "ROC_Test_RF.jpeg")
+#Loading and preparing the Exploratory Analysis Tables
+IbisCount1 <- IbisC %>% count(Sex, Age, wt = HaeParasitPA)
+IbisCount2 <- IbisC %>% count(Season, wt = HaeParasitPA)
+IbisCount3 <- IbisC %>% count(Site, wt = HaeParasitPA)
+#Loading Model Results
+data_locationPA1 <- here::here("results", "Tables", "Model1MetricsPA.Rda")
+model1 <- readRDS(data_locationPA1)
+data_locationPA2 <- here::here("results", "Tables", "Model2MetricsPA.Rda")
+model2 <- readRDS(data_locationPA2)
+data_locationPA3 <- here::here("results", "Tables", "Model3MetricsPA.Rda")
+model3 <- readRDS(data_locationPA3)
+data_locationPA4 <- here::here("results", "Tables", "Model4MetricsPA.Rda")
+model4 <- readRDS(data_locationPA4)
+data_locationPA5 <- here::here("results", "Tables", "Model5MetricsPA.Rda")
+model5 <- readRDS(data_locationPA5)
+data_locationPA6 <- here::here("results", "Tables", "Model6MetricsPA.Rda")
+model6 <- readRDS(data_locationPA6)
+data_locationPA7 <- here::here("results", "Tables", "Model7MetricsPA.Rda")
+model7 <- readRDS(data_locationPA7)
+data_locationPA8 <- here::here("results", "Tables", "Model8MetricsPA.Rda")
+model8 <- readRDS(data_locationPA8)
+data_locationPA9 <- here::here("results", "Tables", "Model9MetricsPA.Rda")
+model9 <- readRDS(data_locationPA9)
+#Loading required materials - Tables
+mod_loc_1 <- here::here("results", "Models", "Model1PA.Rda")
+mod_loc_2 <- here::here("results", "Models", "Model2PA.Rda")
+mod_loc_3 <- here::here("results", "Models", "Model3PA.Rda")
+mod_loc_4 <- here::here("results", "Models", "Model4PA.Rda")
+mod_loc_5 <- here::here("results", "Models", "Model5PA.Rda")
+mod_loc_6 <- here::here("results", "Models", "Model6PA.Rda")
+mod_loc_7 <- here::here("results", "Models", "Model7PA.Rda")
+mod_loc_8 <- here::here("results", "Models", "Model8PA.Rda")
+mod_loc_9 <- here::here("results", "Models", "Model9PA.Rda")
+
+
 ```
 
 
-# Introduction 
+## Introduction 
 
 ## General Background Information
-The data this analysis concerns is American White Ibis (*Eudocimus albus*) blood parasite data that was collected from 2010-2017. The parasite the data focuses on is the protozoan *Haemoproteus*, which causes a chronic blood infection in White Ibises and many other birds. *Haemoproteus* is a vector-borne disease, it is transmitted by *Culicoides* biting midges when they feed on the birds and causes long-lasting parasitemia. Adult healthy birds tolerate haemosporidian infections well, but young birds and birds outside their normal range that are naive to the pathogen are more likely to develop clinical disease. Haemosporidian infections usually cause long-lasting chronic infections in natural hosts, and can cause reduced reproductive success, host fitness, and increased stress and disease susceptibility.
+The data this analysis concerns is American White Ibis (*Eudocimus albus*) blood parasite data that was collected from 2010-2017. The parasite the data focuses on is the protozoan *Haemoproteus*, which causes a chronic blood infection in White Ibises and many other birds. *Haemoproteus* is a vector-borne disease, it is transmitted by *Culicoides* biting midges when they feed on the birds and causes long-lasting parasitemia [@Coker2017]. Adult healthy birds tolerate haemosporidian infections well, but young birds and birds outside their normal range that are naive to the pathogen are more likely to develop clinical disease [@Coker2017]. Haemosporidian infections usually cause long-lasting chronic infections in natural hosts, and can cause reduced reproductive success, host fitness, and increased stress and disease susceptibility [@Coker2017].
 
 The purpose of this analysis is to determine whether the presence of *Haemoproteus* was increasing over time in Ibis in southern Florida, and if so, determine any demographic trends among the Ibis or temporal or spatial trends among the system at large. Here we investigate whether age, sex, sampling site, capture season, date of capture, body condition, and/or mass of captured Ibis make significant differences on the overall presence of *Haemoproteus* in the birds. 
 
-# Methods
+## Methods
 
-## Data Collection
+### Data Collection
 
 The data was collected by various undergraduate and graduate students of Dr. Sonia Hernandez and Dr. Michael Yabsley at the University of Georgia. Wild American White Ibis were captured during multiple sampling seasons between 2010-2017 in various urban and natural habitat sites from southern Florida. Data was recorded in excel sheets that included information about the sampling sites (habitat type, location, etc.) and various characteristics about the captured Ibis (weight, sex, age, etc.). Ibis were bled and lab diagnostics were performed at the Southeastern Cooperative Wildlife Disease Study (SCWDS) at UGA in order to determine the presence of *Haemoproteus* parasitemia, and if possible, amount of parasitemia in the blood.
 
-## Data Cleaning
+### Data Cleaning
 
 The data was organized in 2 excel sheets; one containing all the lab diagnostic data concerning the sampled Ibis and the other containing all the descriptive, demographic, and geographic data about the sampled Ibis. Both excel files were combined while removing uninformative and duplicate variables in both. Variables of importance were standardized once both datasheets were combined. If sampling season was not recorded but sampling date was for an Ibis, season was determined from the date and added. I dichotomized the recorded amount of *Haemoproteus* parasitemia to either "1" (presence) or "0" (absence) by whether or not the Ibis had a parasitemia value of above zero. Locations that did not have presence of *Haemoproteus* and had less than 5 observations with little demographic information were removed from analysis.
 
-## Data Analysis
+### Data Analysis
 
 Univariate relationships between the presence of *Haemoproteus* parasitemia and each predictor were assessed using logistic regression treating *Haemoproteus* parasitemia presence as a categorical outcome. Multivariate classification was also performed, determination of variables to include was performed by sequential forward floating selection. In addition, a Least Absolute Shrinkage and Selection Operator (LASSO) model, a decision tree, and a random forest model were all conducted with *Haemoproteus* parasitemia presence as the outcome variable. The goal of all models was maximization of accuracy and roc_auc on test data using a 10 fold cross-validation (80/20 split, 5 times repeated).
 
-## Study Population
+### Study Population
 
-During all of the sampling seasons, 668 Ibis were sampled. Among those sampled, 355 Ibis had a positive *Haemoproteus* parasitemia value. 20 Ibis were removed from the analysis because they did not have a positive *Haemoproteus* parasitemia value and the site from which they were captured had less than or equal to 5 sampled Ibis and had no presence of infected Ibis. 
+During all of the sampling seasons, 668 Ibis were sampled. Among those sampled, 355 Ibis had a positive *Haemoproteus* parasitemia value. 20 Ibis were removed from the analysis because they did not have a positive *Haemoproteus* parasitemia value and the site from which they were captured had less than or equal to 5 sampled Ibis and had no presence of infected Ibis. Ibis were either classified as having parasitemia (1 - presence) or not having parasitemia (0 - absence). 
 
+### Exploratory Analysis
 
-## Exploratory Analysis
+Here we looked at various variate and covariate relationships between the predictor variables and the main outcome variable of presence of *Haemoproteus* in the sampled Ibis. The following tables and figures show those relationships prior to the statistical analysis. 
 
-
-
-### Tables
-
-To start the exploratory analysis, we're going to create some quick tables to get an idea of the metrics for some of the columns of interest.
+#### Tables
+```{r}
+IbisCount1
+```
+Overall, looking at the distribution of Ibis Sex and Age, the are more females than males and adults than juveniles. Female adults have the highest number with 109. Another clear observation from this table is that there are a large number of these missing variables in the dataset. This will most likely have to be completed with and without imputation depending on the model used.
 
 ```{r}
-IbisC %>%
-  count(Sex, wt = HaeParasitPA)
+IbisCount2
 ```
-
-Looking at presence/absence data for haemoproteus parasitemia, there were about double the number of female ibises with active infection compared to the males. 78 of the ibises sampled were negative for haemoproteus infection.  
+This table shows the number of Ibis sampled during each season. The majority of the Ibis were sampled in the later years (2015-2017) than in the earlier years (2010-2014).
 
 ```{r}
-IbisC %>%
-  count(Age, wt = HaeParasitPA)
+IbisCount3
 ```
+The majority of the Ibis were sampled in SWA, DRP, and ICP sites. Most of the Ibis were sampled in urban sites compared to natural sites.
 
-Here we can see that there was about 2.7 times more adults sampled with active infection than juvenile ibises. 59 of the sampled ibises with active infection either couldn't be aged or age was not recorded.
-
-```{r}
-IbisC %>%
-  count(Age, Sex, wt = HaeParasitPA)
-```
-
-Combining age and sex, we can see that adult females had the highest number of active infections. Categories with missing numbers are prevalent.
-
-```{r}
-IbisC %>%
-  count(Site, wt = HaeParasitPA)
-```
-Looking at site, SWA, ICP, and DRP were the sites with the highest number of sampled ibises with active infection.
-
-```{r}
-IbisC %>%
-  count(Season, wt = HaeParasitPA)
-```
-Looking at season sampled, Spring 2016 had the highest number of sampled ibises with active infection, followed by Summer 2013, Spring 2017, and Spring 2014.
-
-```{r}
-IbisC %>%
-  count(BodyCondScore, Age, wt = HaeParasitPA)
-```
-Looking at body condition score, the majority of the birds sampled with active infection were an ideal weight or underweight. This lets us know that an active infection didn't affect body condition too harshly on these birds.
-
-### Figures
+#### Figures
 
 Now we can move onto creating some figures for the data to see any patterns visually.
 
 Figure 1: Haemoproteus parasitemia from sampled infected Ibises from 2010-2017 by habitat type
 ```{r}
-ExpFigure1 <-ggplot(IbisC) +
-  geom_point(aes(x = Date, y = HaeParasitLog10, color = HabType)) +
-  ggtitle("Haemoproteus parasitemia from sampled infected Ibises from 2010-2017 by habitat type") +
-  xlab("Date") +
-  ylab("Haemoproteus Parasitemia (Log base 10)") +
-  scale_color_discrete("Habitat Type", na.translate = F) +
-  theme(plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10))
-
-Figure_file1 <- here("results", "Figures", "ExpFigure1.png")
-ggsave(filename = Figure_file1,plot = ExpFigure1)
-
-ExpFigure1
+knitr::include_graphics(figure_Exp_1, error = FALSE)
 ```
 
-This scatterplot graphs the sample dates chronologically against the parasitemia measured from the sampled ibis on a transformed log base 10 scale. Habitat type is depicted by color of the dots. Overall, there is a general narrowing of the data over time with a slight negative correlation. There isn't a clear difference between natural and urban habitat types when it comes to amount of parasitemia. 
+This scatterplot graphs the sample dates chronologically against the parasitemia measured from the sampled ibis on a transformed log base 10 scale. Habitat type is depicted by color of the dots. Overall, there is a general narrowing of the data over time with a slight negative correlation. There isn't a clear difference between natural and urban habitat types when it comes to amount of parasitemia in the later years. 
 
-Figure 2: Haemoproteus parasitemia from adult and juvenile sampled Ibises
+
+Figure 2: Haemoproteus parasitemia by total female and male Ibis mass
 ```{r}
-ExpFigure2 <- IbisC %>%
-  drop_na(Age) %>%
-  ggplot() +
-  geom_violin(aes(x = Age, y = HaeParasit)) +
-  ggtitle("Haemoproteus parasitemia from adult and juvenile sampled Ibises") +
-  xlab("Age") +
-  ylab("Haemoproteus Parasitemia") +
-  scale_y_continuous(limits = c(0, 0.1)) +
-  theme(plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10))
-
-Figure_file2 <- here("results", "Figures", "ExpFigure2.png")
-ggsave(filename = Figure_file2, plot = ExpFigure2)
-
-ExpFigure2
-```
-
-This violin plot graphs the haemoproteus parasitemia distribution for the adult and juvenile Ibises sampled. The majority of the parasitemia values are on the lower end for both adults and juveniles. The distribution for adults reaches higher than juveniles. The overall structure for the adult distribution is higher and skinnier, while juveniles have more of their parasitemias lower in value. 
-
-Figure 3: Haemoproteus parasitemia from sampled Ibises by sex
-```{r}
-ExpFigure3 <- IbisC %>%
-  drop_na(Sex) %>%
-  ggplot() +
-  geom_boxplot(aes(x = Sex, y = HaeParasit)) +
-  scale_y_continuous(limits = c(0, 0.5)) +
-  ggtitle("Haemoproteus parasitemia from sampled Ibises by sex") +
-  xlab("Sex") +
-  ylab("Haemoproteus Parasitemia") +
-  theme(plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10))
-
-Figure_file3 <- here("results", "Figures", "ExpFigure3.png")
-ggsave(filename = Figure_file3, plot = ExpFigure3)
-
-ExpFigure3
-```
-
-The haemoproteus parasitemia distributions between sexes is extremely similar. The median value for males is slightly higher than females. The majority of the measured parasitemias are between 0.0 and 0.1. 
-
-Figure 4: Haemoproteus parasitemia by total female and male Ibis mass
-```{r}
-ExpFigure4 <- IbisC %>%
-  drop_na(BirdMassG, Sex) %>%
-  ggplot() +
-  geom_point(aes(x = BirdMassG, y = HaeParasitLog10, color = Sex)) +
-  theme(axis.text.x = element_text(angle = 90)) +
-  scale_x_continuous(limits = c(130, 1240)) +
-  ggtitle("Haemoproteus parasitemia by total female and male Ibis mass") +
-  xlab("Total mass of Ibis (g)") +
-  ylab("Haemoproteus Parasitemia (Log base 10)") +
-  theme(plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10))
-
-Figure_file4 <- here("results", "Figures", "ExpFigure4.png")
-ggsave(filename = Figure_file4, plot = ExpFigure4)
-
-ExpFigure4
+knitr::include_graphics(figure_Exp_4, error = FALSE)
 ```
 
 Looking at the plot, male birds seem to weigh more than females. However, when comparing the parasitemia between females and males, there isn't a clear difference between the two.
 
-Figure 5: Haemoproteus parasitemia by female and male Ibis mass and body condition score
+Figure 3: Haemoproteus parasitemia by sample site and habitat type
 ```{r}
-ExpFigure5 <- IbisC %>%
-  drop_na(BirdMassG, BodyCondScore, Sex) %>%
-  ggplot() +
-  geom_point(aes(x = BirdMassG, y = HaeParasitLog10, color = BodyCondScore)) +
-  facet_wrap(~ Sex) +
-  ggtitle("Haemoproteus parasitemia by female and male Ibis mass and body condition score") +
-  xlab("Total mass of Ibis (g)") +
-  ylab("Haemoproteus Parasitemia (Log base 10)") +
-  theme(axis.text.x = element_text(angle = 90),
-        plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10)) +
-  scale_x_continuous(limits = c(130, 1240)) +
-  scale_color_discrete("Body Condition", na.translate = F)
-
-Figure_file5 <- here("results", "Figures", "ExpFigure5.png")
-ggsave(filename = Figure_file5, plot = ExpFigure5)
-
-ExpFigure5
-```
-
-Looking at this plot, there are more underweight female ibises with higher parasitemias compared to males. This could be due to the higher number of sampled females though. 
-
-Figure 6: Haemoproteus parasitemia by sample site and habitat type
-```{r}
-ExpFigure6 <- IbisC %>%
-  drop_na(HabType, Site) %>%
-  ggplot() +
-  geom_point(aes(x = Site, y = log10(HaeParasit), color = HabType)) +
-  theme(axis.text.x = element_text(angle = 90),
-        plot.title = element_text(hjust = 0.5, size = 10),
-        axis.title.x = element_text(size = 10),
-        axis.title.y = element_text(size = 10),
-        legend.title = element_text(size = 10)) +
-  ggtitle("Haemoproteus parasitemia by sample site and habitat type") +
-  xlab("Sample Site") +
-  ylab("Haemoproteus Parasitemia (Log base 10)") +
-  scale_color_discrete("Habitat Type", na.translate = F) 
-
-Figure_file6 <- here("results", "Figures", "ExpFigure6.png")
-ggsave(filename = Figure_file6, plot = ExpFigure6)
-
-ExpFigure6
+knitr::include_graphics(figure_Exp_6, error = FALSE)
 ```
 
 Looking at this plot broadly, it seems that the sites with a natural habitat have a slightly lower average parasitemia than the sites with an urban habitat. 
 
-Overall, there are no huge patterns or clear differences between covariates and variates so far. Statistical analyses may pick up on any significant differences later on, but I will return to the exploratory analysis as I continue with the project. I will also be meeting with those involved with the project to discuss as well.
+Overall, there are no huge patterns or clear differences between covariates and variates so far. Statistical analyses may pick up on any significant differences later on.
 
-## Statistical Analyses
 
-### Presence/Absence Haemoproteus Parasitemia Data
+### Statistical Analyses
+
+#### Univariate and Multivariate Logistic Models
 
 This section details the results of a preliminary statistical analysis on the Haemoproteus parasitemia data just looking at the presence and absence data, as opposed to the amount of parasitemia per sampled bird.
 
 The following models were setup and tested through a 10-fold cross-validation. The training/testing data proportions were 80/20. 10 folds were taken on 80% of the observations, and the results are depicted here. I am currently struggling with applying the models generated by CV to the testing data.
 
 ```{r}
-data_locationPA1 <- here::here("results", "Tables", "Model1MetricsPA.Rda")
-table1 <- readRDS(data_locationPA1)
-table1
+model1
 ```
-This univariate classification GLM looked at the effect of habitat type on the presence of Haemoproteus in infected birds. The results were unsatisfactory.
+This univariate classification GLM looked at the effect of age on the presence of Haemoproteus in infected birds. The results were unsatisfactory with an accuracy of 0.569 and roc_auc of 0.444.
 
 ```{r}
-data_locationPA2 <- here::here("results", "Tables", "Model2MetricsPA.Rda")
-table2 <- readRDS(data_locationPA2)
-table2
+model2
 ```
-This univariate classification GLM looked at the effect of sex of the Ibis on the presence of Haemoproteus in infected birds. The results were unsatisfactory.
+This univariate classification GLM looked at the effect of sex of the Ibis on the presence of Haemoproteus in infected birds. The results were unsatisfactory with an accuracy of 0.606 and roc_auc of 0.533, the metrics were higher than age.
  
 ```{r}
-data_locationPA3 <- here::here("results", "Tables", "Model3MetricsPA.Rda")
-table3 <- readRDS(data_locationPA3)
-table3
+model3
 ```
-This univariate classification GLM looked at the effect of age of the Ibis on the presence of Haemoproteus in infected birds. The results were unsatisfactory.
+This univariate classification GLM looked at the effect of sampling site of the Ibis on the presence of Haemoproteus in infected birds. The results were unsatisfactory with an accuracy of 0.583 and roc_auc of 0.593.
 
 ```{r}
-data_locationPA4 <- here::here("results", "Tables", "Model4MetricsPA.Rda")
-table4 <- readRDS(data_locationPA4)
-table4
+model4
 ```
-This univariate classification GLM looked at the effect of sampling site on the presence of Haemoproteus in infected birds. The results were unsatisfactory.
+This univariate classification GLM looked at the effect of sampling season on the presence of Haemoproteus in infected birds. The results were somewhat satisfactory with an accuracy of 0.639 and roc_auc of 0.655.
 
 ```{r}
-data_locationPA5 <- here::here("results", "Tables", "Model5MetricsPA.Rda")
-table5 <- readRDS(data_locationPA5)
-table5
+model5
 ```
-This univariate classification GLM looked at the effect of sampling date on the presence of Haemoproteus in infected birds. The results were unsatisfactory.
+This univariate classification GLM looked at the effect of sampling date on the presence of Haemoproteus in infected birds. The results were unsatisfactory with an accuracy of 0.539 and roc_auc of 0.548. 
 
 ```{r}
-data_locationPA6 <- here::here("results", "Tables", "Model6MetricsPA.Rda")
-table6 <- readRDS(data_locationPA6)
-table6
+model6
 ```
-This univariate classification GLM looked at the effect of sampling season on the presence of Haemoproteus in infected birds. The results were unsatisfactory, however, these results were better than the other univariate models so far.
+This univariate classification GLM looked at the effect of habitat type on the presence of Haemoproteus in infected birds. The results were unsatisfactory, however, these results were better than the other univariate models so far.
 
 ```{r}
-data_locationPA7 <- here::here("results", "Tables", "Model7MetricsPA.Rda")
-table7 <- readRDS(data_locationPA7)
-table7
+model7
 ```
-This multivariate classification GLM looked at the effect of age and sex on the presence of Haemoproteus in infected birds. The results were unsatisfactory, this model scored about the same as the previous univariate models for age and sex.
+This univariate classification GLM looked at the effect of total bird mass in grams on the presence of Haemoproteus in infected birds. The results were unsatisfactory with an accuracy of 0.626 and roc_auc of 0.511.
 
 ```{r}
-data_locationPA8 <- here::here("results", "Tables", "Model8MetricsPA.Rda")
-table8 <- readRDS(data_locationPA8)
-table8
+model8
 ```
-This multivariate classification GLM looked at the effect of sampling date and sampling season on the presence of Haemoproteus in infected birds. The results here had the highest performance of all the other models so far. One way to interpret this model would be that as the sampling effort continued from 2010-2017, the passage of time and season had a significant effect on the presence of Haemoproteus in Ibis. However, the performance of this model isn't high enough to successfully conclude with that explanation.
+This multivariate classification logistic model looked at the effect of sampling date and sampling season on the presence of Haemoproteus in infected birds. The results here had the highest performance of all the other models so far. One way to interpret this model would be that as the sampling effort continued from 2010-2017, the passage of time and season had a significant effect on the presence of Haemoproteus in Ibis. However, the performance of this model isn't high enough to successfully conclude with that explanation.
 
-### Regression Models for the Amount of Haemoproteus Parasitemia
+```{r}
+model9
+```
+This multivariate classification logistic model looked at the effect of sampling date and site on the presence of *Haemoproteus* in infected birds. The results were unsatisfactory, just a little lower than the previous multivariate classification model. Sampling date and site are important variables to determine the presence of *Haemoproteus*, although season has an effect as well.
 
-This section details the results of a preliminary statistical analysis on the Haemoproteus parasitemia data looking at the amount of measured parasitemia per sampled bird (on a logarithm base 10 scale), as opposed to presence/absence data.
+#### Decision Tree Model
 
-The following models were setup and tested through a 10-fold cross-validation. The training/testing data proportions were 80/20. 10 folds were taken on 80% of the observations, and the results are depicted here. I am currently struggling with applying the models generated by CV to the testing data.
+The decision tree model was run on all the predictors against the *Haemoproteus* parasitemia presence and absence data. The model was run on all 10 folds of the training data. The roc_auc of the best tree was 0.681 and the accuracy of the model was 0.631. The two predictors that had the most significant effect on the accuracy of the model were the sample date and mass of the sampled birds in grams. The mos tree with the best parameters had a maximum depth of 8 nodes. 
+
+```{r ImpPlotDT.jpeg, echo = FALSE, out.width = '100%'}
+knitr::include_graphics(figure_ML_1, error = FALSE)
+```
+Looking at the variable importance plot, we can see that sampling date and the mass of the birds in grams are the most significant predictors for the presence of *Haemoproteus* in infected birds. Sampling season is also important, as well as the SWA site. SWA had the highest number of sampled birds. 
+
+
+```{r}
+knitr::include_graphics(figure_ML_2, error = FALSE)
+```
+This is the decision tree layout. Here we can see that sampling date is the primary predictor to start the tree. Bird mass, body condition, and SWA site are the other predictors that determine presence. 
+
+
+#### LASSO Model
+
+I conducted a Least Absolute Shrinkage and Selection Operator (LASSO) Model with the presence or absence of *Haemoproteus* parasitemia as the outcome variable and using all the predictor variables. The model had an roc_auc of 0.674. Below is the graph of the regularization.
+
+```{r}
+knitr::include_graphics(figure_ML_3, error = FALSE)
+```
+
+
 
 #### Random Forest Model
 
-The following are the results from a random forest model run on all the predictors against the Haemoproteus parasitemia (log base 10) data. The missing data values were imputed by K nearest neighbors. The model was run on all 10 folds from the training dataset.
-```{r}
-data_locationRF <- here::here("results", "Tables", "RandomForestMetrics.Rda")
-table9 <- readRDS(data_locationRF)
-table9
+The random forest model was run on all the predictors against the *Haemoproteus* parasitemia presence and absence data. The best model resulted in an roc_auc of 0.712, which was the best so far. 
+
+```{r Variable Importance Model}
+knitr::include_graphics(figure_ML_4, error = FALSE)
 ```
-This random forest model looked at the effect of all predictors on the amount of Haemoproteus in infected birds. The results were unsatisfactory, this model had a relatively high RMSE and low R squared value.
+Looking at the variable importance plot, it is similar to the decision tree that sample date and bird mass in grams were the top predictors.
 
-#### Linear Regression Model
+The best random forest model was run on the testing dataset, and resulted in an roc_auc of 0.725 and accuracy of 0.715. The ROC curve for that random forest model is shown below.
 
-The following are the results from a linear regression model run on habitat type against the Haemoproteus parasitemia (log base 10) data. 
-
-```{r}
-data_locationLM1 <- here::here("results", "Tables", "LinMetrics1.Rda")
-table10 <- readRDS(data_locationLM1)
-table10
+```{r ROC Curve for Random Forest Model, echo = FALSE, out.width = '100%'}
+knitr::include_graphics(figure_ML_5, error = FALSE)
 ```
-This linear regression model looked at the effect of habitat type on the amount of Haemoproteus in infected birds. The results were unsatisfactory, the RMSE is high and the R squared value is very low.
 
-#### Conclusions so far
+### Conclusions
 
-This concludes the statistical analysis for part 3. Overall, the models did not perform well, especially those looking at the amount of Haemoproteus in infected birds. The presence/absence data has more potential for conclusions to be made based on generated models. The next steps would be to fine-tune the classification models for the presence/absence data and create a random forest model.
-
-Current problems that have arose in this process include imputing missing values to run models (as there is a large amount of missing data in this dataset), and visualizing the tidymodels results on a graph. 
-
+This concludes the statistical analysis for part 4. Overall, the majority of the univariate models didn't perform well on the training dataset. Adding multivariate models increased the accuracy of the models but still was not accurate enough to conclude from. The random forest model performed the best and increased performance on the testing dataset. A conclusion we can make from this model is that the mass of the birds is important in determining *Haemoproteus* presence or absence, but sampling date is the most important. *Haemoproteus* presence in these Ibis is increasing in southern Florida regardless of sampling site. 
 
 
 

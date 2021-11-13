@@ -232,7 +232,7 @@ saveRDS(Model7MetricsPA, file = "results/Tables/Model7MetricsPA.Rda")
 ##########################Multivariate GLM regression models#############################
 
 ######Model 8
-#Recipe setup for model, Parasitemia P/A vs Age and Sex on training data
+#Recipe setup for model, Parasitemia P/A vs Season and Date on training data
 PA_rec8_glm <- recipe(HaeParasitPA ~ Season + Date, data = PATrainDF)
 
 #Workflow Setup 7
@@ -418,7 +418,7 @@ saveRDS(ImpPlotRF, file = "results/Figures/ImpPlotRF.Rda")
 #Getting the predictions and residuals
 
 rf_residpredict <- final_rf_fit %>%
-  augment(new_data = PATrainDF) %>%
+  augment(PATrainDF) %>%
   select(.pred_1, HaeParasitPA)
 
 #Plot for Predicted vs Observed Values
@@ -451,8 +451,11 @@ ROC_Test_RF <- Test_rf_fit %>%
   collect_predictions() %>% 
   roc_curve(HaeParasitPA, .pred_0) %>% 
   autoplot()
+
 saveRDS(ROC_Test_RF, file = "results/Figures/RF_Test_ROCPlot.Rda")
 
+file_location <- here("results", "Figures", "ROC_TestPlot")
+ggsave(filename = file_location, plot = ROC_Test_RF)
 
 
 
