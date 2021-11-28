@@ -11,7 +11,7 @@ This data analysis project uses R, Rmarkdown (and variants, e.g. bookdown), Gith
 * All data is located in the 'raw_data' and 'processed_data' folders.
 * All code is located in the 'processing_script' and 'analysis_scripts' folders.
 * All results (figures, tables, computed values) are located in the `results` folder and subfolders.
-* All products (manuscripts, supplementary files) are located in the  `products` subfolders. The references used in the manuscript and the metadata are located here as well.
+* All products (manuscripts, supplementary files) are located in the  `products` and 'supplementary_materials' subfolders. The references used in the manuscript and the metadata are located here as well.
 * See the various `readme.md` files in those folders for some more information.
 
 # Content 
