@@ -166,7 +166,7 @@ ExpFigure2 <- IbisC %>%
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file2 <- here("results", "Figures", "ExpFigure2.png")
+Figure_file2 <- here("supplemental_materials", "Figures", "ExpFigure2.png")
 ggsave(filename = Figure_file2, plot = ExpFigure2)
 
 #########Plot 3: Boxplot of haemoproteus parasitemia vs sex
@@ -184,7 +184,7 @@ ExpFigure3 <- IbisC %>%
         axis.title.y = element_text(size = 10),
         legend.title = element_text(size = 10))
 
-Figure_file3 <- here("results", "Figures", "ExpFigure3.png")
+Figure_file3 <- here("supplemental_materials", "Figures", "ExpFigure3.png")
 ggsave(filename = Figure_file3, plot = ExpFigure3)
 
 ##########Plot 4: Scatterplot of haemoproteus parasitemia vs bird weight with sex
@@ -223,7 +223,7 @@ ExpFigure5 <- IbisC %>%
   scale_x_continuous(limits = c(130, 1240)) +
   scale_color_discrete("Body Condition", na.translate = F)
 
-Figure_file5 <- here("results", "Figures", "ExpFigure5.png")
+Figure_file5 <- here("supplemental_materials", "Figures", "ExpFigure5.png")
 ggsave(filename = Figure_file5, plot = ExpFigure5)
 
 ###########Plot 6: Scatterplot of haemoptroteus parasitemia vs sample site and habitat type

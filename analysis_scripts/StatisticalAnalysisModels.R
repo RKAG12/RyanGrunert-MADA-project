@@ -109,8 +109,8 @@ Model1MetricsPA <- collect_metrics(PA_fit1)
 #Accuracy = 0.545, roc_auc = 0.451
 
 #Saving the results and table
-saveRDS(PA_fit1, file = "results/Models/Model1PA.Rda")
-saveRDS(Model1MetricsPA, file = "results/Tables/Model1MetricsPA.Rda")
+saveRDS(PA_fit1, file = "supplemental_materials/Models/Model1PA.Rda")
+saveRDS(Model1MetricsPA, file = "supplemental_materials/Tables/Model1MetricsPA.Rda")
 
 
 
@@ -128,8 +128,8 @@ Model2MetricsPA <- collect_metrics(PA_fit2)
 #Accuracy = 0.606, roc_auc = 0.534
 
 #Saving the results and table
-saveRDS(PA_fit2, file = "results/Models/Model2PA.Rda")
-saveRDS(Model2MetricsPA, file = "results/Tables/Model2MetricsPA.Rda")
+saveRDS(PA_fit2, file = "supplemental_materials/Models/Model2PA.Rda")
+saveRDS(Model2MetricsPA, file = "supplemental_materials/Tables/Model2MetricsPA.Rda")
 
 
 
@@ -147,8 +147,8 @@ Model3MetricsPA <- collect_metrics(PA_fit3)
 #Accuracy = 0.584, roc_auc = 0.594
 
 #Saving the results and table
-saveRDS(PA_fit3, file = "results/Models/Model3PA.Rda")
-saveRDS(Model3MetricsPA, file = "results/Tables/Model3MetricsPA.Rda")
+saveRDS(PA_fit3, file = "supplemental_materials/Models/Model3PA.Rda")
+saveRDS(Model3MetricsPA, file = "supplemental_materials/Tables/Model3MetricsPA.Rda")
 
 
 
@@ -205,8 +205,8 @@ Model6MetricsPA <- collect_metrics(PA_fit6)
 #Accuracy = 0.535, roc_auc = 0.476
 
 #Saving the results and table
-saveRDS(PA_fit6, file = "results/Models/Model6PA.Rda")
-saveRDS(Model6MetricsPA, file = "results/Tables/Model6MetricsPA.Rda")
+saveRDS(PA_fit6, file = "supplemental_materials/Models/Model6PA.Rda")
+saveRDS(Model6MetricsPA, file = "supplemental_materials/Tables/Model6MetricsPA.Rda")
 
 
 ######Model 7
@@ -223,8 +223,8 @@ Model7MetricsPA <- collect_metrics(PA_fit7)
 #Accuracy = 0.627, roc_auc = 0.511
 
 #Saving the results and table
-saveRDS(PA_fit7, file = "results/Models/Model7PA.Rda")
-saveRDS(Model7MetricsPA, file = "results/Tables/Model7MetricsPA.Rda")
+saveRDS(PA_fit7, file = "supplemental_materials/Models/Model7PA.Rda")
+saveRDS(Model7MetricsPA, file = "supplemental_materials/Tables/Model7MetricsPA.Rda")
 
 
 
@@ -263,8 +263,8 @@ Model9MetricsPA <- collect_metrics(PA_fit9)
 #Accuracy = 0.590, roc_auc = 0.608
 
 #Saving the results and table
-saveRDS(PA_fit9, file = "results/Models/Model9PA.Rda")
-saveRDS(Model9MetricsPA, file = "results/Tables/Model9MetricsPA.Rda")
+saveRDS(PA_fit9, file = "supplemental_materials/Models/Model9PA.Rda")
+saveRDS(Model9MetricsPA, file = "supplemental_materials/Tables/Model9MetricsPA.Rda")
 
 #Main conclusion is that the date
 #is most significant in predicting whether or not the ibis
@@ -304,6 +304,7 @@ dt_grid <- grid_regular(cost_complexity(), tree_depth(), levels = 5)
 dt_wf <- workflow() %>% add_model(dt_mod1) %>% add_recipe(PA_rec1)
 
 #Tuning the model for the decision tree
+###RUNNING THE MODEL HERE - may take a while depending on machine... 10-15 minutes
 dt_fit1 <- dt_wf %>% tune_grid(resamples = PAFolds, grid = dt_grid)
 
 collect_metrics(dt_fit1)
@@ -320,17 +321,17 @@ final_dt_fit <- final_dt_wf %>% last_fit(data_split_log)
 
 ModelDTMetricsPA <- collect_metrics(final_dt_fit)
 
-saveRDS(final_dt_fit, file = "results/Models/FinalDTFit.Rda")
-saveRDS(ModelDTMetricsPA, file = "results/Tables/ModelDTMetrics.Rda")
+saveRDS(final_dt_fit, file = "supplemental_materials/Models/FinalDTFit.Rda")
+saveRDS(ModelDTMetricsPA, file = "supplemental_materials/Tables/ModelDTMetrics.Rda")
 
 
 #Diagnostic Plots
 DTTree <- rpart.plot(extract_fit_parsnip(final_dt_fit)$fit)
-saveRDS(DTTree, file = "results/Figures/DTTree.Rda")
+saveRDS(DTTree, file = "supplemental_materials/Figures/DTTree.Rda")
 
 
 ImpPlotDT <- final_dt_fit %>% extract_fit_parsnip() %>% vip()
-saveRDS(ImpPlotDT, file = "results/Figures/ImpPlotDT.Rda")
+saveRDS(ImpPlotDT, file = "supplemental_materials/Figures/ImpPlotDT.Rda")
 ###Based on this model, roc_auc is about 0.675 which is the same
 #as the LASSO model.  Sample date seems to be the most
 #important variable in the model. In the model, the first decision is whether
@@ -366,9 +367,9 @@ top_lasso
 lasso_fig <- lasso_fit1 %>% autoplot()
 #Not terrible, but ROC_AUC is 0.674
 
-saveRDS(lasso_fit1, file = "results/Models/LASSOmod.Rda")
-saveRDS(top_lasso, file = "results/Tables/ModelLASSOMetrics.Rda")
-saveRDS(lasso_fig, file = "results/Figures/LASSOFig.Rda")
+saveRDS(lasso_fit1, file = "supplemental_materials/Models/LASSOmod.Rda")
+saveRDS(top_lasso, file = "supplemental_materials/Tables/ModelLASSOMetrics.Rda")
+saveRDS(lasso_fig, file = "supplemental_materials/Figures/LASSOFig.Rda")
 
 
 #################################Random Forest#################################
@@ -379,6 +380,7 @@ rf_wf1 <- workflow() %>%
   add_recipe(PA_rec1)
 
 #Tuning model and running it
+###RUNNING THE MODEL HERE... will take ~15-20 minutes to run completely. 
 rf_fit1 <- rf_wf1 %>%
             tune_grid(resamples = PAFolds, grid = 25,
                       control_grid(save_pred = TRUE),
