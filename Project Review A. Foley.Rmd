@@ -1,0 +1,200 @@
+---
+title: Project Review A. Foley 
+date: "`r file.mtime(knitr::current_input())`"
+#bibliography: ../media/references.bib
+output: 
+  html_document:
+    toc_depth: 3
+    number_sections: true
+---
+
+# Overview
+
+Title of project: Prevalence of Haemoproteus parasites in American White Ibis from Southern Florida
+
+Name of project author(s): Ryan Grunert
+
+Name of project reviewer: Amelia Foley
+
+
+
+# Specific project content evaluation
+
+
+## Background, Context and Motivation
+How well is the context of the project described? Is a comprehensive background, including summary of previous/related work given? Is the project well placed into the context of existing work (including proper referencing of existing work). Is it clear why the project was undertaken and what new information it hopes to provide?
+
+### Feedback and Comments
+
+The abstract provides a succinct summary of the project and the introduction and background information elaborate an appropriate amount on the context of the study. I can understand where this research fits into the current body of work and see that this is supported by a couple of references. To add to the motivation aspect, perhaps you could include a sentence or two elaborating on why studying this is important (ecological implications, etc). 
+
+Unsure if "loading required data and packages" section is purposefully included in the manuscript - should this be set to echo=FALSE? 
+
+### Summary assessment
+* strong contextualization and motivation
+
+
+## Question description
+How well and clear are the question(s)/hypotheses the project aims to address described? Is it clear how the questions relate to the data?
+
+
+### Feedback and Comments
+
+The project aims are easily found in the general background information. It's clear that the main question regard whether Haemoproteus increases over tiem in Ibis, with secondary question about demographic trends. The variables of interest are clearly listed.
+
+### Summary assessment
+* question/hypotheses fully clear
+
+
+## Data description
+How well is the data overall described? Is the source provided? Is a codebook or other meta-information available that makes it clear what the data is? 
+
+### Feedback and Comments
+
+The source of the data is well-described. I was able to locate the meta data word doc in the products folder, but initially was looking for it in the raw data folder (I think it might make more sense to have it there). The meta data provides clear definitions for the raw data. I see that you note the number of Ibis sampled in the study population section, but I might also include the number of observations and variables earlier in the data collection section, to provide the reader a general scope of the study size.
+
+### Summary assessment
+* source and overall structure of data well explained
+
+
+## Data wrangling and exploratory analysis
+How well is the data cleaned/processed and explored? Are all steps reasonable and well explained? Are alternatives discussed and considered? Are meaningful exploratory results shown (e.g. in the supplementary materials)?
+
+### Feedback and Comments
+
+The cleaning process is summarized in the manuscript and also described in notes in the processing script, making it easy to follow along. I would remove the first person "I" statement from the data cleaning section and switch to third-person. 
+
+This line appears a few times in the manuscript - knitr::include_graphics(figure_Exp_1, error = FALSE)
+This comes up between your figure caption and the figure, making it seem a little disconnected. 
+
+In your supplemental file, I think you might need an extra line between your figures and the text following them - currently the paragraph starts to the right of the image rather than on a new line.
+
+The exploratory analysis process was easy to follow along and I understood your thought process through the figures and your explanations following them. 
+
+Some of your figures lack captions or figure numbers - adding these might be helpful for the organization of the supplement and manuscript
+
+### Summary assessment
+* essentially no weaknesses in wrangling and exploratory component
+
+
+
+## Appropriateness of Analysis
+Were the analysis methods appropriate for the data? Was the analysis done properly? Were different components of the analysis (e.g. performance measure, variable selection, data pre-processing, model evaluation) done in the best way possible and explained well?
+
+### Feedback and Comments
+
+Analysis is well structured and explained, both in the manuscript and the code. Multiple univariate models were performed, as well as a multivariate model and three machine learning models, which seems to really strengthen the analysis. You may want to explicitly state that you only report the random forest model in the manuscript because it was the best performing model (possibly citing the comparison you provide in the supplementary material). 
+
+Model performance metrics are clearly stated in the methods section, and continually referred to throughout the manuscript to add context to the results. Your interpretation of the analysis seems justified and well-supported by the metrics. 
+
+### Summary assessment
+* strong and reasonable analysis
+
+## Presentation
+How well are results presented? Are tables and figures easy to read and understand? Are the main figures/tables publication level quality? 
+
+### Feedback and Comments
+
+Some figures are in need of captions/figure numbers so that readers can easily ID them
+
+Figures are tables are easy to understand. The figures appear publication ready though there is not much formatting for the tables - they are readable but might require a different format to be considered "publication level quality"
+
+### Summary assessment
+* results are very well presented
+
+
+## Discussion/Conclusions
+Are the study findings properly discussed? Are strengths and limitations acknowledged? Are findings interpreted properly?
+
+### Feedback and Comments
+
+Findings are well summarized in the first paragraph of the discussion, and limitations are addressed thoroughly. If there are particular strengths to this study (compared to previous ones, such as longer study period, greater number of observations, level of analysis), maybe you could state some strengths in this section. 
+
+Your final statement about numerous other factors regarding infection making further conclusions difficult seems a bit vague. What other factors? Maybe you could reframe this by defining specific needs for further studies. Between that sentence and the sentence prior, it seems to take value away from your conclusion. Definitely important to acknowledge limitations but maybe you can end the paragraph on a stronger note? 
+
+In discussion section, their -> there
+
+### Summary assessment
+* strong, complete and clear discussion
+
+
+
+# Overall project content evaluation
+Evaluate overall features of the project  by filling in the sections below.
+
+
+## Structure
+Is the project well structured? Are files in well labeled folders? Do files have reasonable names? Are all "junk" files not needed for analysis/reproduction removed? By just looking at files and folders, can you get an idea of how things fit together?
+
+### Feedback and Comments
+
+The whole repo is well organized. The file names make sense and there don't appear to be an extra or unneccesary files that don't serve a particular purpose. The main readme files had all of the info I needed to reproduce the analysis, but even without the readme the files are labelled well enough that I could probably infer the correct order/structure of things. I like that you have your results folder further organized into the different type of result (figure, model, table)
+
+### Summary assessment
+* well structured 
+
+
+## Documentation 
+How well is the project documented? Are you able to understand each step of the whole analysis, each decision that was made, and each line of code? Is enough information provided as comments in code or as part of Rmd files? 
+
+### Feedback and Comments
+
+Processing script very well organized/documented. All scripts are neat and contain a note explaining what each line of code does, very easy to follow along. 
+
+### Summary assessment
+* fully and well documented
+
+
+
+## Reproducibility
+Are all results fully reproducible? Is documentation provided which clearly explains how to reproduce things, and does it work without the need for any manual intervention? Are you able to re-run the whole analysis without having to do manual interventions/edits?
+
+### Feedback and Comments
+
+Received this error running the processing script even after installing rJava (or attempting to) - could definitely be more of an issue with my computer than with your code. Maybe the function `read_excel()` would be more accessible in terms of reproducibility, compared to `read.xlsx` from the `xlsx` packages? 
+
+library(xlsx) #to read in excel spreadsheets
+The operation couldn’t be completed. Unable to locate a Java Runtime.
+Please visit http://www.java.com for information on installing Java.
+
+Error: package or namespace load failed for ‘xlsx’:
+ .onLoad failed in loadNamespace() for 'rJava', details:
+  call: fun(libname, pkgname)
+  error: JVM could not be found
+In addition: Warning messages:
+1: In system("/usr/libexec/java_home", intern = TRUE) :
+  running command '/usr/libexec/java_home' had status 1
+2: In fun(libname, pkgname) :
+  Cannot find JVM library 'NA/lib/server/libjvm.dylib'
+Install Java and/or check JAVA_HOME (if in doubt, do NOT set it, it will be detected)
+
+
+Exploratory analysis ran easily. Your warning/note about the run time for the statistical analysis script is appreciated! The statistical analysis script ran successfully but did take a long time, as you noted. 
+
+
+### Summary assessment
+* small parts not reproducible or required manual intervention 
+
+
+
+## Thoroughness
+How thorough was the overall study? Were alternatives (e.g. different ways of processing the data or different models) considered? Were alternatives discussed? Were the questions/hypotheses fully and thoroughly addressed?
+
+### Feedback and Comments
+
+Multiple models were considered. There were minimal data processing decisions required beyond cleaning, so alternatives don't seem neccessary here. The main question about infections over time is clearly addressed in the discussion/conclusion. There isn't much mention of additional demographic variables in the discussion/conclusion, though this may be due to lack of relationship shown (represented in variable importance figure)
+
+### Summary assessment
+* strong level of thoroughness
+
+
+## Further comments
+
+The section numbers in your manuscript all begin with 0, as in 0.4.2 instead of 4.2 - it may look neater to remove the 0 if you can figure out what causes that
+
+I think you may be missing a title for your references section (?)
+
+Your code for this project look great! All of the scripts are super well organized and easy to follow, and it is obvious that you have a good understanding of the statistical analysis/modeling portion, it seems very well done. I think I would just consider a few small changes with those formatting things in the manuscript and a little more elaboration in the discussion and conclusion, overall this seems like a very good quality analysis
+
+
+
