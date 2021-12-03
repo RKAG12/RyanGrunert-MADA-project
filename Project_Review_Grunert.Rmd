@@ -1,0 +1,163 @@
+# Overview
+
+Title of project: "Prevalence of *Haemoproteus* parasites in American White Ibis from Southern Florida"
+
+Name of project author(s): Ryan Grunert
+
+Name of project reviewer: Carter Coleman
+
+
+# Specific project content evaluation
+Evaluate the different parts of the project by filling in the sections below.
+
+
+## Background, Context and Motivation
+How well is the context of the project described? Is a comprehensive background, including summary of previous/related work given? Is the project well placed into the context of existing work (including proper referencing of existing work). Is it clear why the project was undertaken and what new information it hopes to provide?
+
+### Feedback and Comments
+
+You did a good job describing the mechanisms of transmission of Haemoproteus in American White Ibis populations. However, you are missing the motivation for why this is important. Are the chronic issues in Ibis causing population decline in other areas? Why in South Florida? I just think a little more info and literature on why you are usung the data you are using is needed.
+
+### Summary assessment 
+
+* some contextualization and motivation
+
+
+
+## Question description
+How well and clear are the question(s)/hypotheses the project aims to address described? Is it clear how the questions relate to the data?
+
+
+### Feedback and Comments
+
+Your question is clear. Looks like you are interested in looking at population dynamics of Haemoproteus in Southern Floridian White Ibis populations by assessing correlation of different population chamging parameters with Haemoproteus presence. However, I didn't see a hypothesis clearly stated. I would make sure you include how you expect the Haemoproteus population to change with certain important variables used.
+
+### Summary assessment
+* question/hypotheses somewhat explained
+
+
+
+## Data description
+How well is the data overall described? Is the source provided? Is a codebook or other meta-information available that makes it clear what the data is? 
+
+### Feedback and Comments
+
+Nice and concise explanation of what is in the data set and when/where/who collected the data. No recommendations.
+
+### Summary assessment
+* source and overall structure of data well explained
+
+
+## Data wrangling and exploratory analysis
+How well is the data cleaned/processed and explored? Are all steps reasonable and well explained? Are alternatives discussed and considered? Are meaningful exploratory results shown (e.g. in the supplementary materials)?
+
+### Feedback and Comments
+
+From what I could tell, your data cleaning and exploration was very thorough. I was able to find a biological reason for every processing decision made. Additionally, I like how you incorporated the NA values into the exploration, rather than finding a reason to remove them. I liked your use of the exploration as a way to show distribution of your outcome variable across different potential predictor variables. It was a great use of box, violin, and scatter plots to see if their were any intereting distributions of Haemoproteus.
+
+However, I was not able to run your processinf script because of issues with the "xlsx" package. I was not even able to install the package. I would check into that issue.
+
+### Summary assessment
+
+* essentially no weaknesses in wrangling and exploratory component
+
+
+
+## Appropriateness of Analysis
+Were the analysis methods appropriate for the data? Was the analysis done properly? Were different components of the analysis (e.g. performance measure, variable selection, data pre-processing, model evaluation) done in the best way possible and explained well?
+
+### Feedback and Comments
+
+The types of analyses were appropriate and thorough; Staring with univariate analysis of association and moving to three different machine learning models to assess best combination of predictor variables. However, I would include some text about which machine learning model fit the data best, based on results and model limitations.
+
+### Summary assessment
+* strong and reasonable analysis
+
+## Presentation
+How well are results presented? Are tables and figures easy to read and understand? Are the main figures/tables publication level quality? 
+
+### Feedback and Comments
+
+I think all your figures look great! However, go back through and make sure that the code chunks are not present in you manuscript. You can do this by including the following at the start of the code chunk: {r, echo=FALSE, message=FALSE}.
+
+### Summary assessment
+* results are presented ok, with room for improvement
+
+
+
+## Discussion/Conclusions
+Are the study findings properly discussed? Are strengths and limitations acknowledged? Are findings interpreted properly?
+
+### Feedback and Comments
+
+I liked how you made some softer inferences on what variables may be important in the spread of Haemoproteus in the Whit Ibis populations. By indicating sampling date and mass of bird as potentially strong predictors, it points future research towards understanding seasonality of Haemoproteus spread and support of the traditional parasite hypothesis that underdevelopment and lack of proper growth (indicated by low mass for age) makes one moresuceptible to infection. I would find some literature to back those findings up in the conclusion if you are going to state them specifically.
+
+### Summary assessment
+* minor parts wrong, missing or unclear
+
+
+## Further comments
+
+_Great work! I think most of my comments were about elaborating on what you have further. Nothing is really missing and your analysis was very thorough. I just think statements could be elaborated on and backed up more throughout._
+
+
+
+# Overall project content evaluation
+Evaluate overall features of the project  by filling in the sections below.
+
+
+## Structure
+Is the project well structured? Are files in well labeled folders? Do files have reasonable names? Are all "junk" files not needed for analysis/reproduction removed? By just looking at files and folders, can you get an idea of how things fit together?
+
+### Feedback and Comments
+
+Your structure was great! very well organized and extremely easy to navigate. I barely had to use your readmes to find and run things. I would suggest breaking up parts of your statistical analyses. When you have all machine learning models in one folder, it gets computationally intensive. Maybe that would help with the long wait times to run your analysis script?
+
+### Summary assessment
+* well structured
+
+
+## Documentation 
+How well is the project documented? Are you able to understand each step of the whole analysis, each decision that was made, and each line of code? Is enough information provided as comments in code or as part of Rmd files? 
+
+### Feedback and Comments
+
+Basically see above. It was really easy to follow along with what you did an discern how and why you did things from text in the code files themselves. No recommendations.
+
+### Summary assessment
+* fully and well documented
+
+
+
+## Reproducibility
+Are all results fully reproducible? Is documentation provided which clearly explains how to reproduce things, and does it work without the need for any manual intervention? Are you able to re-run the whole analysis without having to do manual interventions/edits?
+
+### Feedback and Comments
+
+Both your processing script and statistical analysis script produced errors and I was not able to reproduce your results. In your processing script, it was a problem with your "xlsx" package. I wan not able to even install it, so I couldnt load the data. In the statistical analysis script, I got this error on the last chunk: file_location <- here("results", "Figures", "ROC_TestPlot").ggsave(filename = file_location, plot = ROC_Test_RF)
+Error: Unknown graphics device ''. I am not sure what this means, but I would check on it.
+
+
+### Summary assessment
+* major parts not reproducible 
+
+
+## Thoroughness
+How thorough was the overall study? Were alternatives (e.g. different ways of processing the data or different models) considered? Were alternatives discussed? Were the questions/hypotheses fully and thoroughly addressed?
+
+### Feedback and Comments
+
+Based on diversity of exploration and analytical tests performed, I was impressed with the thoroughness of your different analyses. No recommendations 
+
+### Summary assessment
+* strong level of thoroughness
+
+
+## Further comments
+
+_The only glaring issue is that portions of your processing script and statistical analysis script did not run. Just check the issues described above and I think you are all set! Overall, very well done!_
+
+
+
+
+
