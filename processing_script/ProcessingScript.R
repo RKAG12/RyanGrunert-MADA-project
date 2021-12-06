@@ -3,6 +3,7 @@
 #This script loads and cleans raw data for the Ibis data analysis process. It then saves processed data for further analysis.
 
 ###############################Loading all required packages###########################
+library(rJava) #Required for xlsx. Must have Java installed and installed this package.
 library(here) #to set paths
 library(tidyverse) #all required data manipulation packages
 library(xlsx) #to read in excel spreadsheets

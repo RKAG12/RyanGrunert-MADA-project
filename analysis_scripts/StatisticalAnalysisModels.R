@@ -430,6 +430,9 @@ rf_predobs_plot <- ggplot(rf_residpredict, aes(x = HaeParasitPA, y = .pred_1)) +
   ggtitle("Predicted vs. Observed Values for Random Forest Model")
 rf_predobs_plot
 
+#The RANDOM FOREST MODEL performed the best on the training dataset out of all
+#the models tested.
+
 ##############################Fitting Random Forest to Test Data########################################
 set.seed(144)
 Test_rf_fit <- final_rf_wf %>% last_fit(data_split_log)
